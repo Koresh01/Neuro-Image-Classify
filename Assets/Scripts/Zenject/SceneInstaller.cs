@@ -1,11 +1,14 @@
 using UnityEngine;
 using Zenject;
 
-// русский
+[AddComponentMenu("Custom/SceneInstaller (Бинды сцены)")]
 public class SceneInstaller : MonoInstaller
 {
+    [Tooltip("Валидатор датасета.")]
+    [SerializeField] private DatasetValidator datasetValidator;
     public override void InstallBindings()
     {
+        Container.Bind<DatasetValidator>().FromInstance(datasetValidator).AsSingle();
     }
 }
 
