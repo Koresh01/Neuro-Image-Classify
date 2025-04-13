@@ -23,7 +23,7 @@ public class Matrix
         rows = initialData.GetLength(0);
         columns = initialData.GetLength(1);
     }
-
+    #region OPERATORS
     // Перегрузка оператора умножения
     public static Matrix operator *(Matrix a, Matrix b)
     {
@@ -39,20 +39,6 @@ public class Matrix
                 {
                     result[i, j] += a.data[i, k] * b.data[k, j];
                 }
-            }
-        }
-        return new Matrix(result);
-    }
-
-    // Метод для транспонирования матрицы
-    public Matrix T()
-    {
-        double[,] result = new double[columns, rows];
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < columns; j++)
-            {
-                result[j, i] = data[i, j];
             }
         }
         return new Matrix(result);
@@ -75,18 +61,35 @@ public class Matrix
         return new Matrix(result);
     }
 
-    // Метод для вывода матрицы в консоль (для удобства)
-    public override string ToString()
+    public double this[int i, int j]
     {
-        var result = "";
+        get => data[i, j];
+        set => data[i, j] = value;
+    }
+    #endregion
+
+    // Метод для транспонирования матрицы
+    public Matrix T()
+    {
+        double[,] result = new double[columns, rows];
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
             {
-                result += data[i, j] + "\t";
+                result[j, i] = data[i, j];
             }
-            result += "\n";
         }
-        return result;
+        return new Matrix(result);
+    }
+
+    /// <summary>
+    /// Возвращает размерность матрицы.
+    /// 0 - вернёт кол-во строк
+    /// 1 - вернёт кол-во столбцов
+    /// </summary>
+    public int GetLength(int wh)
+    {
+        if (wh == 0) return rows;
+        else return columns;
     }
 }
