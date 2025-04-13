@@ -3,21 +3,21 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-[AddComponentMenu("Custom/LoadingPanel (Логика слайдеров загрузки)")]
+[AddComponentMenu("Custom/LoadingPanel (Р›РѕРіРёРєР° СЃР»Р°Р№РґРµСЂРѕРІ Р·Р°РіСЂСѓР·РєРё)")]
 public class LoadingPanel : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
 
-    [Tooltip("Слайдер прогресса загрузки ОБУЧАЮЩЕЙ выборки изображений")]
+    [Tooltip("РЎР»Р°Р№РґРµСЂ РїСЂРѕРіСЂРµСЃСЃР° Р·Р°РіСЂСѓР·РєРё РћР‘РЈР§РђР®Р©Р•Р™ РІС‹Р±РѕСЂРєРё РёР·РѕР±СЂР°Р¶РµРЅРёР№")]
     [SerializeField] Slider trainLoadProgress;
 
-    [Tooltip("Слайдер прогресса загрузки ТЕСТОВОЙ выборки изображений")]
+    [Tooltip("РЎР»Р°Р№РґРµСЂ РїСЂРѕРіСЂРµСЃСЃР° Р·Р°РіСЂСѓР·РєРё РўР•РЎРўРћР’РћР™ РІС‹Р±РѕСЂРєРё РёР·РѕР±СЂР°Р¶РµРЅРёР№")]
     [SerializeField] Slider testLoadProgress;
 
-    [Tooltip("Кнопка продолжить")]
+    [Tooltip("РљРЅРѕРїРєР° РїСЂРѕРґРѕР»Р¶РёС‚СЊ")]
     [SerializeField] Button continueBtn;
 
-    [Tooltip("Заключение анализа:")]
+    [Tooltip("Р—Р°РєР»СЋС‡РµРЅРёРµ Р°РЅР°Р»РёР·Р°:")]
     [SerializeField] TextMeshProUGUI verdict;
 
     void OnEnable()
@@ -28,7 +28,8 @@ public class LoadingPanel : MonoBehaviour
     void OnDisable()
     {
         datasetValidator.OnReady -= EnableContinueButton;
-        verdict.text = "Вердикт:" + "  ---";
+        
+        verdict.text = "Р’РµСЂРґРёРєС‚:" + "  ---";
         continueBtn.interactable = false;
     }
 
@@ -39,11 +40,11 @@ public class LoadingPanel : MonoBehaviour
     }
 
     /// <summary>
-    /// Меняет панель, когда загрузка датасета завершена.
+    /// РњРµРЅСЏРµС‚ РїР°РЅРµР»СЊ, РєРѕРіРґР° Р·Р°РіСЂСѓР·РєР° РґР°С‚Р°СЃРµС‚Р° Р·Р°РІРµСЂС€РµРЅР°.
     /// </summary>
     void EnableContinueButton()
     {
         continueBtn.interactable = true;
-        verdict.text = "Вердикт:" + datasetValidator.verdict;
+        verdict.text = "Р’РµСЂРґРёРєС‚:" + datasetValidator.verdict;
     }
 }
