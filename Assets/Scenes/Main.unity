@@ -2277,7 +2277,7 @@ MonoBehaviour:
   trainLoadProgress: {fileID: 1890424147}
   testLoadProgress: {fileID: 1638801755}
   continueBtn: {fileID: 465831488}
-  verdict: {fileID: 0}
+  verdict: {fileID: 1446503207}
 --- !u!1 &1890424145
 GameObject:
   m_ObjectHideFlags: 0
