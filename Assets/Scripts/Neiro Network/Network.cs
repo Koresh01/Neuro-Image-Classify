@@ -6,8 +6,17 @@ using UnityEngine;
 /// </summary>
 public class Network : MonoBehaviour
 {
+    [Header("Слои:")]
+    public List<Matrix> s;
+
+    [Header("Активированные слои:")]
+    public List<Matrix> h;
+
     [Header("Матрицы весов:")]
     public List<Matrix> m;
+
+    [Header("Нелинейности:")]
+    public List<Matrix> b;
 
     void Start()
     {
