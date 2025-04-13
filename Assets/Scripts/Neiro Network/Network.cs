@@ -33,7 +33,7 @@ public class Network : MonoBehaviour
     [Inject] DatasetValidator datasetValidator;
 
     [Header("Слои:")]
-    public List<Matrix> s;
+    public List<Matrix> t;
 
     [Header("Активированные слои:")]
     public List<Matrix> h;
@@ -77,12 +77,12 @@ public class Network : MonoBehaviour
         int outputDim = datasetValidator.categoryNames.Count;
 
         // Входной слой
-        s[0] = Numpy.Zeros(1, inputDim);
+        t[0] = Numpy.Zeros(1, inputDim);
 
         // Промежуточные слои добавляются через инспектор —> пропускаем
 
         // Выходной слой
-        s[s.Count - 1] = Numpy.Zeros(1, outputDim);
+        t[t.Count - 1] = Numpy.Zeros(1, outputDim);
     }
 
     /// <summary>
@@ -92,9 +92,9 @@ public class Network : MonoBehaviour
     {
         h = new List<Matrix>();
 
-        for (int i = 0; i < s.Count; i++)
+        for (int i = 0; i < t.Count; i++)
         {
-            h.Add(Numpy.Zeros(1, s[i].GetLength(1))); // Вход и выход не активируем
+            h.Add(Numpy.Zeros(1, t[i].GetLength(1))); // Вход и выход не активируем
         }
     }
 
@@ -105,11 +105,11 @@ public class Network : MonoBehaviour
     {
         W.Clear();
 
-        for (int i = 0; i < s.Count-1; i++)
+        for (int i = 0; i < t.Count-1; i++)
         {
             // Матрицы весов между слоями:
-            int curColumns = s[i].GetLength(1);
-            int nextColumns = s[i+1].GetLength(1);
+            int curColumns = t[i].GetLength(1);
+            int nextColumns = t[i+1].GetLength(1);
 
             Matrix w = Numpy.Random.Randn(curColumns, nextColumns);
             W.Add(w);
@@ -123,12 +123,54 @@ public class Network : MonoBehaviour
     {
         B.Clear();
 
-        for (int i = 0; i < s.Count - 1; i++)
+        for (int i = 0; i < t.Count - 1; i++)
         {
-            int to = s[i + 1].GetLength(1);
+            int to = t[i + 1].GetLength(1);
             B.Add(Numpy.Random.Randn(1, to));
         }
     }
     #endregion
 
+    Matrix Sigmoid(Matrix t)
+    {
+        Matrix res = 1 / (1 + (Numpy.Exp(-t)));
+        return res;
+    }
+
+    /// <summary>
+    /// Нормализует значение выходного вектора.
+    /// <returns>Вектор вероятности отношения изображения к определённой категории.</returns>
+    Matrix SoftMax(Matrix t)
+    {
+        Matrix exp = Numpy.Exp(t);  // Marix недопустим в этом контексте, и = недопустимый термин в выражении
+        return exp / Numpy.Sum(exp);
+    }
+
+    /// <summary>
+    /// Вычисляет величину обшибки.
+    /// <param name="z">Вектор вероятностей</param>
+    /// <param name="y">Индекс правильной категории</param>
+    /// <returns>Double значение величины ошибки.</returns>
+    Double CrossEntropy(Matrix z, int y)    // это разреженная крос-энтропия, т.к. здесь y - это индекс, а не вектор.
+    {
+        return -Math.Log((z[1, y]));
+    }
+
+    void ForwardPropogation()
+    {   
+        // Проход:
+        for (int i = 0; i < t.Count; i++)
+        {
+            t[i+1] = h[i] * W[i] + B[i];    // Осторожно, h[0] должен быть таким же как t[0], это входной слой.
+            h[i+1] = Sigmoid(t[i + 1]);
+        }
+        Matrix lastLayer = t[t.Count - 1];  // последний слой, к которому не применялась функция активации.
+        Matrix z = SoftMax(lastLayer);
+
+        // One hot encoding
+        int y = 2; // индекс истиной категории поданного на вход изображения
+
+        // Вычисление ошибки:
+        Double Error = CrossEntropy(z, y);
+    }
 }

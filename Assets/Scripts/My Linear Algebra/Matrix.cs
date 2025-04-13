@@ -24,7 +24,47 @@ public class Matrix
         columns = initialData.GetLength(1);
     }
     #region OPERATORS
-    // Перегрузка оператора умножения
+    public static Matrix operator -(Matrix a)
+    {
+        double[,] result = new double[a.rows, a.columns];
+        for (int i = 0; i < a.rows; i++)
+            for (int j = 0; j < a.columns; j++)
+                result[i, j] = -a.data[i, j];
+
+        return new Matrix(result);
+    }
+
+
+    public static Matrix operator +(Matrix a, double b)
+    {
+        double[,] result = new double[a.rows, a.columns];
+        for (int i = 0; i < a.rows; i++)
+            for (int j = 0; j < a.columns; j++)
+                result[i, j] = a.data[i, j] + b;
+
+        return new Matrix(result);
+    }
+    public static Matrix operator +(double a, Matrix b)
+    {
+        return b + a; // используем предыдущую перегрузку
+    }
+    public static Matrix operator +(Matrix a, Matrix b)
+    {
+        if (a.rows != b.rows || a.columns != b.columns)
+            throw new ArgumentException("Matrix dimensions must agree.");
+
+        double[,] result = new double[a.rows, a.columns];
+        for (int i = 0; i < a.rows; i++)
+        {
+            for (int j = 0; j < a.columns; j++)
+            {
+                result[i, j] = a.data[i, j] + b.data[i, j];
+            }
+        }
+        return new Matrix(result);
+    }
+
+
     public static Matrix operator *(Matrix a, Matrix b)
     {
         if (a.columns != b.rows)
@@ -43,23 +83,25 @@ public class Matrix
         }
         return new Matrix(result);
     }
-
-    // Перегрузка оператора сложения
-    public static Matrix operator +(Matrix a, Matrix b)
+    public static Matrix operator /(Matrix a, double b)
     {
-        if (a.rows != b.rows || a.columns != b.columns)
-            throw new ArgumentException("Matrix dimensions must agree.");
-
         double[,] result = new double[a.rows, a.columns];
         for (int i = 0; i < a.rows; i++)
-        {
             for (int j = 0; j < a.columns; j++)
-            {
-                result[i, j] = a.data[i, j] + b.data[i, j];
-            }
-        }
+                result[i, j] = a.data[i, j] / b;
+
         return new Matrix(result);
     }
+    public static Matrix operator /(double b, Matrix a)
+    {
+        double[,] result = new double[a.rows, a.columns];
+        for (int i = 0; i < a.rows; i++)
+            for (int j = 0; j < a.columns; j++)
+                result[i, j] = b / a.data[i, j];
+
+        return new Matrix(result);
+    }
+
 
     public double this[int i, int j]
     {
