@@ -8,11 +8,8 @@ public class LoadingPanel : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
 
-    [Tooltip("Слайдер прогресса загрузки ОБУЧАЮЩЕЙ выборки изображений")]
-    [SerializeField] Slider trainLoadProgress;
-
-    [Tooltip("Слайдер прогресса загрузки ТЕСТОВОЙ выборки изображений")]
-    [SerializeField] Slider testLoadProgress;
+    [Tooltip("Слайдер прогресса загрузки.")]
+    [SerializeField] Slider loadProgress;
 
     [Tooltip("Кнопка продолжить")]
     [SerializeField] Button continueBtn;
@@ -35,8 +32,7 @@ public class LoadingPanel : MonoBehaviour
 
     void Update()
     {
-        trainLoadProgress.value = datasetValidator.trainProgress;
-        testLoadProgress.value = datasetValidator.testProgress;
+        loadProgress.value = datasetValidator.loadProgress;
     }
 
     /// <summary>

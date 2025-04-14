@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Zenject;
 
 /// <summary>
@@ -9,6 +10,9 @@ using Zenject;
 public class Network : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
+
+    [Tooltip("Готовность нейросети к использованию.")]
+    public UnityAction onReady;
 
     [Header("Слои:")]
     public List<Matrix> t;
@@ -38,10 +42,15 @@ public class Network : MonoBehaviour
     /// </summary>
     void Init()
     {
-        InitIntermediateLayers();
-        InitActivatedLayers();
-        InitWeights();
-        InitBiases();
+        if (datasetValidator.isValid)
+        { 
+            InitIntermediateLayers();
+            InitActivatedLayers();
+            InitWeights();
+            InitBiases();
+
+            onReady?.Invoke();
+        }
     }
 
     /// <summary>

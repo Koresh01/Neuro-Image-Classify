@@ -35,8 +35,7 @@ public class DatasetValidator : MonoBehaviour
     public List<string> categoryNames;
 
     [Header("Прогресс загрузки:")]
-    [Range(0, 1)] public float trainProgress;
-    [Range(0, 1)] public float testProgress;
+    [Range(0, 1)] public float loadProgress;
 
     /* ---------------------- Обучающая выборка ----------------------*/
     [Header("Обучающая выборка:")]
@@ -87,63 +86,47 @@ public class DatasetValidator : MonoBehaviour
             return;
         }
 
-        // Запускаем анализ параллельно
-        StartCoroutine(ValidateAsync(trainPath, testPath));
+        StartCoroutine(Validate(trainPath, testPath));
     }
 
     /// <summary>
-    /// Параллельно проверяем обучающий и тестовый наборы фотографий
+    /// Проверяем обучающий и тестовый наборы фотографий.
     /// </summary>
-    private IEnumerator ValidateAsync(string trainPath, string testPath)
+    private IEnumerator Validate(string trainPath, string testPath)
     {
-        // Отображаем пользователю панель загрузки:
         popUpPanelsController.ShowPanel("Загрузка датасета");
+        loadProgress = 0;
 
-        trainProgress = 0;
-        testProgress = 0;
+        int trainImageCount = CountImages(trainPath);
+        int testImageCount = CountImages(testPath);
+        int totalImages = trainImageCount + testImageCount;
 
-        Vector2Int size = Vector2Int.zero;  // Размерность входных изображений [пикс].
-        
-        // Несовпадения в размерностях изображений.
-        bool sizeMismatch1 = false; // -> в обучающей выборке
-        bool sizeMismatch2 = false; // -> в тестовой выборке
+        float trainWeight = (float)trainImageCount / totalImages;
+        float testWeight = (float)testImageCount / totalImages;
 
-        // Индикаторы завершения обоих корутин.
-        bool trainDone = false;
-        bool testDone = false;
+        var trainResult = new CategoryAnalysisResult();
+        yield return StartCoroutine(AnalyzeCategory(trainPath, progress => loadProgress = progress * trainWeight, trainResult));
 
-        StartCoroutine(AnalyzeCategoryFolderAsync(trainPath, v => trainProgress = v, (list, total, s, mismatch) =>
-        {
-            trainCategories = list;
-            trainTotal = total;
-            size = s;
-            sizeMismatch1 = mismatch;
-            trainDone = true;
-        }));
+        var testResult = new CategoryAnalysisResult();
+        yield return StartCoroutine(AnalyzeCategory(testPath, progress => loadProgress = trainWeight + progress * testWeight, testResult));
 
-        StartCoroutine(AnalyzeCategoryFolderAsync(testPath, v => testProgress = v, (list, total, _, mismatch) =>
-        {
-            testCategories = list;
-            testTotal = total;
-            sizeMismatch2 = mismatch;
-            testDone = true;
-        }));
-
-        while (!trainDone || !testDone)
-            yield return null;
-
-        // Размер входного изображения:
-        if (sizeMismatch1 || sizeMismatch2)
+        if (trainResult.sizeMismatch || testResult.sizeMismatch)
         {
             verdict = "Невозможно использовать этот датасет. Все изображения должны быть одинакового разрешения!";
             isValid = false;
             OnReady?.Invoke();
             yield break;
         }
-        imageSize = size;
 
-        // Совпадение по названиям категорий в ОБУЧАЮЩЕЙ и ТЕСТОВОЙ выборках:
+        imageSize = trainResult.imageSize;
+        trainCategories = trainResult.categories;
+        trainTotal = trainResult.totalCount;
+
+        testCategories = testResult.categories;
+        testTotal = testResult.totalCount;
+
         categoryNames = trainCategories.Select(c => c.name).ToList();
+
         if (!Enumerable.SequenceEqual(categoryNames, testCategories.Select(c => c.name)))
         {
             verdict = "Невозможно использовать этот датасет. Категории в папках train и test не совпадают!";
@@ -152,28 +135,18 @@ public class DatasetValidator : MonoBehaviour
             yield break;
         }
 
-        // Одинаковое ли количество картинок в каждой категории.
         bool balanced = trainCategories.Select(c => c.count).Distinct().Count() == 1;
 
-        // Вердикт:
         isValid = true;
         verdict = balanced
             ? "Датасет корректен и сбалансирован."
             : "Датасет допустим к использованию, однако категории содержат неодинаковое количество изображений.";
 
-        // Гасим пользователю панель загрузки:
-        //popUpPanelsController.ClosePanel("Загрузка датасета");
         OnReady?.Invoke();
     }
-
-    private IEnumerator AnalyzeCategoryFolderAsync(string path, Action<float> onProgress, Action<List<CategoryInfo>, int, Vector2Int, bool> onComplete)
+    private IEnumerator AnalyzeCategory(string path, Action<float> onProgress, CategoryAnalysisResult result)
     {
-        var result = new List<CategoryInfo>();
         var categories = Directory.GetDirectories(path);
-        int totalCount = 0;
-        Vector2Int imageSize = Vector2Int.zero;
-        bool sizeMismatch = false;
-
         int totalImages = categories.Sum(cat => Directory.GetFiles(cat)
             .Count(f => f.EndsWith(".png") || f.EndsWith(".jpg") || f.EndsWith(".jpeg")));
 
@@ -186,8 +159,8 @@ public class DatasetValidator : MonoBehaviour
                 .Where(f => f.EndsWith(".png") || f.EndsWith(".jpg") || f.EndsWith(".jpeg"))
                 .ToArray();
 
-            result.Add(new CategoryInfo { name = catName, count = images.Length });
-            totalCount += images.Length;
+            result.categories.Add(new CategoryInfo { name = catName, count = images.Length });
+            result.totalCount += images.Length;
 
             foreach (var imgPath in images)
             {
@@ -195,22 +168,39 @@ public class DatasetValidator : MonoBehaviour
                 Texture2D tex = new Texture2D(2, 2);
                 tex.LoadImage(data);
 
-                if (imageSize == Vector2Int.zero)
-                    imageSize = new Vector2Int(tex.width, tex.height);
-                else if (imageSize.x != tex.width || imageSize.y != tex.height)
-                    sizeMismatch = true;
+                if (result.imageSize == Vector2Int.zero)
+                    result.imageSize = new Vector2Int(tex.width, tex.height);
+                else if (result.imageSize.x != tex.width || result.imageSize.y != tex.height)
+                    result.sizeMismatch = true;
 
                 UnityEngine.Object.Destroy(tex);
 
                 processedImages++;
                 onProgress?.Invoke((float)processedImages / totalImages);
 
-                // Прочитали 65 изображений и освободили кадр, разрешив перейти в следующему кадру. Если будет не 65, а 1, то лагать не будет, а загружать будет по 1 изображению за 1 кадр. Слишком долго короче.
                 if (processedImages % 65 == 0)
                     yield return null;
             }
         }
+
         onProgress?.Invoke(1.0f);
-        onComplete?.Invoke(result, totalCount, imageSize, sizeMismatch);
+    }
+    private int CountImages(string path)
+    {
+        return Directory.GetDirectories(path)
+            .Sum(cat => Directory.GetFiles(cat)
+                .Count(f => f.EndsWith(".png") || f.EndsWith(".jpg") || f.EndsWith(".jpeg")));
+    }
+
+
+    private class CategoryAnalysisResult
+    {
+        public List<CategoryInfo> categories = new();
+        public int totalCount = 0;
+        public Vector2Int imageSize = Vector2Int.zero;
+        public bool sizeMismatch = false;
     }
 }
+
+
+
