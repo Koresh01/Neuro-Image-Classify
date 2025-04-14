@@ -9,9 +9,7 @@ using Zenject;
 using UnityEngine.Events;
 using UnityEditor;
 
-/// <summary>
-/// Пара "Категория - Кол-во изображений".
-/// </summary>
+
 [Serializable]
 public class CategoryInfo
 {
@@ -20,6 +18,19 @@ public class CategoryInfo
 
     [Tooltip("Количество изображений")]
     public int count;
+}
+
+// [Serializable]
+public class ImageData
+{
+    [Tooltip("Путь до изображения.")]
+    public string path;
+
+    [Tooltip("Индекс истиной категории этого изображения.")]
+    public int y;
+
+    [Tooltip("Название категории.")]
+    public string categoryName;
 }
 
 /// <summary>
@@ -38,6 +49,10 @@ public class DatasetValidator : MonoBehaviour
     [Header("Общая информация:")]
     [Tooltip("Названия категорий (общие для train и test).")]
     public List<string> categoryNames;
+
+    [Tooltip("Изображение и индекс его категории.")]
+    public List<ImageData> trainImagesPaths; // path, номер категории, название категории   
+    public List<ImageData> testImagesPaths;
 
     /* ---------------------- Обучающая выборка ----------------------*/
     [Header("Обучающая выборка:")]
@@ -67,9 +82,6 @@ public class DatasetValidator : MonoBehaviour
     [Tooltip("Можно ли использовать датасет.")]
     public bool isValid = false;
 
-    [Tooltip("Изображение и индекс его категории.")]
-    public Dictionary<string, int> imagesPaths;    // int индекс категории должен совпадать с индексом в trainCategories
-
     [Tooltip("Готовность датасета к использованию.")]
     public UnityAction OnReady;
 
@@ -77,6 +89,8 @@ public class DatasetValidator : MonoBehaviour
     [ContextMenu("Загрузить датасет")]
     public void LoadDataset()
     {
+        ResetAllData();
+
         var paths = StandaloneFileBrowser.OpenFolderPanel("Выбор папки с датасетом", "", false);
         if (paths.Length == 0 || string.IsNullOrEmpty(paths[0])) return;
 
@@ -106,7 +120,7 @@ public class DatasetValidator : MonoBehaviour
     {
         yield return ValidateCategories(trainPath, testPath);
         yield return ValidateImageDistribution(trainPath, testPath);
-        yield return ValidateImageSizes(trainPath, testPath);
+        yield return ValidateImageSizesAndCollectPaths(trainPath, testPath);
 
         verdict += "Датасет пригоден для использования.";
         isValid = true;
@@ -184,29 +198,34 @@ public class DatasetValidator : MonoBehaviour
     }
 
     /// <summary>
-    /// Проверяет размерность всех изображений.
+    /// Проверяет размерность всех изображений и одновременно формирует словари:
+    /// trainImagesPaths и testImagesPaths.
     /// </summary>
-    IEnumerator ValidateImageSizes(string trainPath, string testPath)
+    IEnumerator ValidateImageSizesAndCollectPaths(string trainPath, string testPath)
     {
+        trainImagesPaths = new List<ImageData>();
+        testImagesPaths = new List<ImageData>();
         int imageCount = 0;
 
-        // Валидация для обучающей и тестовой выборки
-        yield return ValidateCategoryImages(trainPath);
-        yield return ValidateCategoryImages(testPath);
+        // Проверяем train и test выборки
+        yield return ProcessSet(trainPath, trainImagesPaths);
+        yield return ProcessSet(testPath, testImagesPaths);
 
-        // Просто внутреннее объявление функции:
-        IEnumerator ValidateCategoryImages(string path)
+        // Внутренняя функция проверки и сбора путей
+        IEnumerator ProcessSet(string rootPath, List<ImageData> imageList)
         {
-            var categories = Directory.GetDirectories(path);
-            foreach (var category in categories)
+            for (int categoryIndex = 0; categoryIndex < categoryNames.Count; categoryIndex++)
             {
-                string categoryName = Path.GetFileName(category);
-                string[] images = Directory.GetFiles(category)
+                string categoryName = categoryNames[categoryIndex];
+                string categoryPath = Path.Combine(rootPath, categoryName);
+
+                string[] images = Directory.GetFiles(categoryPath)
                     .Where(f => f.EndsWith(".png") || f.EndsWith(".jpg") || f.EndsWith(".jpeg"))
                     .ToArray();
 
                 foreach (var imgPath in images)
                 {
+                    // Проверка размеров
                     byte[] data = File.ReadAllBytes(imgPath);
                     Texture2D tex = new Texture2D(2, 2);
                     tex.LoadImage(data);
@@ -214,22 +233,33 @@ public class DatasetValidator : MonoBehaviour
                     if (imageSize == Vector2Int.zero)
                         imageSize = new Vector2Int(tex.width, tex.height);
                     else if (imageSize.x != tex.width || imageSize.y != tex.height)
-                        stopValidation("Разрешение изображений не стандартизированы.");
+                    {
+                        stopValidation("Разрешения изображений не стандартизированы.");
+                        yield break;
+                    }
 
-                    
-                    
-                    // Заодно вычисляем сколько % прогрузилось
+                    // Добавляем путь
+                    imageList.Add(new ImageData
+                    {
+                        path = imgPath,
+                        y = categoryIndex,
+                        categoryName = categoryName
+                    });
+
+                    // Обновление прогресса
                     imageCount++;
                     loadProgress = (float)imageCount / (trainTotal + testTotal);
-                    //Debug.Log("Dataset Load Progress: " + loadProgress*100 + "%");
 
-                    // Каждые 65 изображений — отпускать кадр
-                    if (imageCount % 65 == 0)
+                    // Отпускание кадра:
+                    if (imageCount % 40 == 0)
                         yield return null;
                 }
             }
         }
     }
+
+
+
     #endregion
 
 
@@ -241,6 +271,32 @@ public class DatasetValidator : MonoBehaviour
         verdict = text;
         StopAllCoroutines();
         OnReady?.Invoke();
+    }
+
+    /// <summary>
+    /// Полностью очищает все данные валидатора.
+    /// </summary>
+    public void ResetAllData()
+    {
+        loadProgress = 0f;
+
+        // Общая информация
+        categoryNames = new List<string>();
+        trainImagesPaths = new List<ImageData>();
+        testImagesPaths = new List<ImageData>();
+
+        // Обучающая выборка
+        trainTotal = 0;
+        trainCategories = new List<CategoryInfo>();
+
+        // Тестовая выборка
+        testTotal = 0;
+        testCategories = new List<CategoryInfo>();
+
+        // Итог
+        imageSize = Vector2Int.zero;
+        verdict = string.Empty;
+        isValid = false;
     }
 }
 
