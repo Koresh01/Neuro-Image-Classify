@@ -41,6 +41,6 @@ public class LoadingPanel : MonoBehaviour
     void EnableContinueButton()
     {
         continueBtn.interactable = true;
-        verdict.text = "Вердикт:" + datasetValidator.verdict;
+        verdict.text = "Вердикт:\n" + datasetValidator.verdict;
     }
 }

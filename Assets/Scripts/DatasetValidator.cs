@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections;
 using Zenject;
 using UnityEngine.Events;
+using UnityEditor;
 
 /// <summary>
 /// Пара "Категория - Кол-во изображений".
@@ -29,13 +30,14 @@ public class DatasetValidator : MonoBehaviour
 {
     [Tooltip("Контроллер всплывающих панелей.")]
     [Inject] PopUpPanelsController popUpPanelsController;
+
+    [Header("Прогресс загрузки:")]
+    [Range(0, 1)] public float loadProgress;
+
     /* ---------------------- Общая информация ----------------------*/
     [Header("Общая информация:")]
     [Tooltip("Названия категорий (общие для train и test).")]
     public List<string> categoryNames;
-
-    [Header("Прогресс загрузки:")]
-    [Range(0, 1)] public float loadProgress;
 
     /* ---------------------- Обучающая выборка ----------------------*/
     [Header("Обучающая выборка:")]
@@ -65,11 +67,15 @@ public class DatasetValidator : MonoBehaviour
     [Tooltip("Можно ли использовать датасет.")]
     public bool isValid = false;
 
+    [Tooltip("Изображение и индекс его категории.")]
+    public Dictionary<string, int> imagesPaths;    // int индекс категории должен совпадать с индексом в trainCategories
+
     [Tooltip("Готовность датасета к использованию.")]
     public UnityAction OnReady;
 
-    [ContextMenu("Проверить датасет")]
-    public void ValidateDataset()
+
+    [ContextMenu("Загрузить датасет")]
+    public void LoadDataset()
     {
         var paths = StandaloneFileBrowser.OpenFolderPanel("Выбор папки с датасетом", "", false);
         if (paths.Length == 0 || string.IsNullOrEmpty(paths[0])) return;
@@ -86,121 +92,156 @@ public class DatasetValidator : MonoBehaviour
             return;
         }
 
+        popUpPanelsController.ShowPanel("Загрузка датасета");
+        // Проверка правильности датасета:
         StartCoroutine(Validate(trainPath, testPath));
     }
 
+
+    #region ВАЛИДАЦИЯ
     /// <summary>
-    /// Проверяем обучающий и тестовый наборы фотографий.
+    /// Проверяет правильность датасета.
     /// </summary>
-    private IEnumerator Validate(string trainPath, string testPath)
+    IEnumerator Validate(string trainPath, string testPath)
     {
-        popUpPanelsController.ShowPanel("Загрузка датасета");
-        loadProgress = 0;
+        yield return ValidateCategories(trainPath, testPath);
+        yield return ValidateImageDistribution(trainPath, testPath);
+        yield return ValidateImageSizes(trainPath, testPath);
 
-        int trainImageCount = CountImages(trainPath);
-        int testImageCount = CountImages(testPath);
-        int totalImages = trainImageCount + testImageCount;
-
-        float trainWeight = (float)trainImageCount / totalImages;
-        float testWeight = (float)testImageCount / totalImages;
-
-        var trainResult = new CategoryAnalysisResult();
-        yield return StartCoroutine(AnalyzeCategory(trainPath, progress => loadProgress = progress * trainWeight, trainResult));
-
-        var testResult = new CategoryAnalysisResult();
-        yield return StartCoroutine(AnalyzeCategory(testPath, progress => loadProgress = trainWeight + progress * testWeight, testResult));
-
-        if (trainResult.sizeMismatch || testResult.sizeMismatch)
-        {
-            verdict = "Невозможно использовать этот датасет. Все изображения должны быть одинакового разрешения!";
-            isValid = false;
-            OnReady?.Invoke();
-            yield break;
-        }
-
-        imageSize = trainResult.imageSize;
-        trainCategories = trainResult.categories;
-        trainTotal = trainResult.totalCount;
-
-        testCategories = testResult.categories;
-        testTotal = testResult.totalCount;
-
-        categoryNames = trainCategories.Select(c => c.name).ToList();
-
-        if (!Enumerable.SequenceEqual(categoryNames, testCategories.Select(c => c.name)))
-        {
-            verdict = "Невозможно использовать этот датасет. Категории в папках train и test не совпадают!";
-            isValid = false;
-            OnReady?.Invoke();
-            yield break;
-        }
-
-        bool balanced = trainCategories.Select(c => c.count).Distinct().Count() == 1;
-
+        verdict += "Датасет пригоден для использования.";
         isValid = true;
-        verdict = balanced
-            ? "Датасет корректен и сбалансирован."
-            : "Датасет допустим к использованию, однако категории содержат неодинаковое количество изображений.";
-
         OnReady?.Invoke();
     }
-    private IEnumerator AnalyzeCategory(string path, Action<float> onProgress, CategoryAnalysisResult result)
-    {
-        var categories = Directory.GetDirectories(path);
-        int totalImages = categories.Sum(cat => Directory.GetFiles(cat)
-            .Count(f => f.EndsWith(".png") || f.EndsWith(".jpg") || f.EndsWith(".jpeg")));
 
-        int processedImages = 0;
+    /// <summary>
+    /// Проверяет названия папок в обучающей и тестовой выборках.
+    /// </summary>
+    IEnumerator ValidateCategories(string trainPath, string testPath)
+    {
+        var trainCategoriesPaths = Directory.GetDirectories(trainPath);
+        var testCategoriesPaths = Directory.GetDirectories(testPath);
+
+        // Извлекаем имена категорий, используя Path.GetFileName
+        List<string> trainCategories = trainCategoriesPaths
+            .Select(path => Path.GetFileName(path))
+            .ToList();
+
+        List<string> testCategories = testCategoriesPaths
+            .Select(path => Path.GetFileName(path))
+            .ToList();
+
+        // Проверяем, совпадают ли категории
+        if (!trainCategories.SequenceEqual(testCategories))
+        {
+            stopValidation("Категории изображений обучающей выборки не совпадают с категориями тестовых изображений");
+        }
+
+        categoryNames = trainCategories;
+
+        yield return null;
+    }
+
+    /// <summary>
+    /// Совпадает ли кол-во изображений каждой категории в обучающей выборке.
+    /// </summary>
+    IEnumerator ValidateImageDistribution(string trainPath, string testPath)
+    {
+        // Обучающая выборка:
+        var categories = Directory.GetDirectories(trainPath);
 
         foreach (var category in categories)
         {
-            string catName = Path.GetFileName(category);
+            string categoryName = Path.GetFileName(category);
             string[] images = Directory.GetFiles(category)
                 .Where(f => f.EndsWith(".png") || f.EndsWith(".jpg") || f.EndsWith(".jpeg"))
                 .ToArray();
+            trainCategories.Add(new CategoryInfo { name = categoryName, count = images.Length });
 
-            result.categories.Add(new CategoryInfo { name = catName, count = images.Length });
-            result.totalCount += images.Length;
-
-            foreach (var imgPath in images)
-            {
-                byte[] data = File.ReadAllBytes(imgPath);
-                Texture2D tex = new Texture2D(2, 2);
-                tex.LoadImage(data);
-
-                if (result.imageSize == Vector2Int.zero)
-                    result.imageSize = new Vector2Int(tex.width, tex.height);
-                else if (result.imageSize.x != tex.width || result.imageSize.y != tex.height)
-                    result.sizeMismatch = true;
-
-                UnityEngine.Object.Destroy(tex);
-
-                processedImages++;
-                onProgress?.Invoke((float)processedImages / totalImages);
-
-                if (processedImages % 65 == 0)
-                    yield return null;
-            }
+            // Заодно ссчитаем сколько картинок в обучающей выборке.
+            trainTotal += images.Length;
         }
 
-        onProgress?.Invoke(1.0f);
-    }
-    private int CountImages(string path)
-    {
-        return Directory.GetDirectories(path)
-            .Sum(cat => Directory.GetFiles(cat)
-                .Count(f => f.EndsWith(".png") || f.EndsWith(".jpg") || f.EndsWith(".jpeg")));
+        // Проверяем, если в trainCategories есть разные значения в count
+        int expectedCount = trainCategories.First().count;
+        bool isBalanced = trainCategories.All(c => c.count == expectedCount);
+        verdict = "В обучающей выборке в каждой категории разное количество изображений. ";
+
+        // Тестовая выборка:
+        categories = Directory.GetDirectories(testPath);
+        foreach (var category in categories)
+        {
+            string categoryName = Path.GetFileName(category);
+            string[] images = Directory.GetFiles(category)
+                .Where(f => f.EndsWith(".png") || f.EndsWith(".jpg") || f.EndsWith(".jpeg"))
+                .ToArray();
+            testCategories.Add(new CategoryInfo { name = categoryName, count = images.Length });
+
+            // Заодно ссчитаем сколько картинок в обучающей выборке.
+            testTotal += images.Length;
+        }
+
+        yield return null;
     }
 
-
-    private class CategoryAnalysisResult
+    /// <summary>
+    /// Проверяет размерность всех изображений.
+    /// </summary>
+    IEnumerator ValidateImageSizes(string trainPath, string testPath)
     {
-        public List<CategoryInfo> categories = new();
-        public int totalCount = 0;
-        public Vector2Int imageSize = Vector2Int.zero;
-        public bool sizeMismatch = false;
+        int imageCount = 0;
+
+        // Валидация для обучающей и тестовой выборки
+        yield return ValidateCategoryImages(trainPath);
+        yield return ValidateCategoryImages(testPath);
+
+        // Просто внутреннее объявление функции:
+        IEnumerator ValidateCategoryImages(string path)
+        {
+            var categories = Directory.GetDirectories(path);
+            foreach (var category in categories)
+            {
+                string categoryName = Path.GetFileName(category);
+                string[] images = Directory.GetFiles(category)
+                    .Where(f => f.EndsWith(".png") || f.EndsWith(".jpg") || f.EndsWith(".jpeg"))
+                    .ToArray();
+
+                foreach (var imgPath in images)
+                {
+                    byte[] data = File.ReadAllBytes(imgPath);
+                    Texture2D tex = new Texture2D(2, 2);
+                    tex.LoadImage(data);
+
+                    if (imageSize == Vector2Int.zero)
+                        imageSize = new Vector2Int(tex.width, tex.height);
+                    else if (imageSize.x != tex.width || imageSize.y != tex.height)
+                        stopValidation("Разрешение изображений не стандартизированы.");
+
+                    
+                    
+                    // Заодно вычисляем сколько % прогрузилось
+                    imageCount++;
+                    loadProgress = (float)imageCount / (trainTotal + testTotal);
+                    //Debug.Log("Dataset Load Progress: " + loadProgress*100 + "%");
+
+                    // Каждые 65 изображений — отпускать кадр
+                    if (imageCount % 65 == 0)
+                        yield return null;
+                }
+            }
+        }
+    }
+    #endregion
+
+
+    /// <summary>
+    /// Экстренное завершение валидации.
+    /// </summary>
+    void stopValidation(string text)
+    {
+        verdict = text;
+        StopAllCoroutines();
+        OnReady?.Invoke();
     }
 }
-
 
 
