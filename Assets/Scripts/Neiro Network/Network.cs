@@ -3,28 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-/*
- 
-INPUT_DIM
-
-   v
-
- LAYER 1
-
-   v
-
-   H1 (Relu)
-   
-   v
-
- LAYER 2
-
-   v
-
-Softmax()
-
- */
-
 /// <summary>
 /// Нейросеть обучаемая.
 /// </summary>
@@ -131,10 +109,20 @@ public class Network : MonoBehaviour
     }
     #endregion
 
+    #region ДОПФУНКЦИИ
     Matrix Sigmoid(Matrix t)
     {
         Matrix res = 1 / (1 + (Numpy.Exp(-t)));
         return res;
+    }
+    /// <summary>
+    /// Произовдная от sigmoid.
+    /// </summary>
+    /// <returns>Вектор, к каждому элементу которого применена произовдная</returns>
+    Matrix Sigmoid_deriv(Matrix t)
+    {
+        Matrix sigmoid = 1 / (1 + Numpy.Exp(-t));
+        return sigmoid * (1 - sigmoid);
     }
 
     /// <summary>
@@ -153,24 +141,90 @@ public class Network : MonoBehaviour
     /// <returns>Double значение величины ошибки.</returns>
     Double CrossEntropy(Matrix z, int y)    // это разреженная крос-энтропия, т.к. здесь y - это индекс, а не вектор.
     {
-        return -Math.Log((z[1, y]));
+        return -Math.Log((z[0, y]));
     }
 
+    /// <summary>
+    /// One-hot encoding
+    /// </summary>
+    /// <param name="y">Индекс истиной категории изображения.</param>
+    /// <returns>Вектор правильного ответа. Нулевой вектор, с единицей по индексу истиной категории изображения.</returns>
+    Matrix to_full(int y)
+    {
+        int num_classes = t[t.Count - 1].GetLength(1);
+        Matrix y_full = Numpy.Zeros(1, num_classes);
+        y_full[0, y] = 1;
+        return y_full;
+
+    }
+
+    /// <summary>
+    /// Применяет шаг градиентного спуска к весам указанного слоя.
+    /// </summary>
+    /// <param name="layer">Индекс слоя, к которому применяется обновление.</param>
+    void ApplyGradientStep(Matrix dE_dW, Matrix dE_dB, int layer)
+    {
+        W[layer] -= 0.001 * dE_dW;
+        B[layer] -= 0.001 * dE_dB;
+    }
+    #endregion
+
+
+
+
+    /// <summary>
+    /// Истиный индекс категории изображения.
+    /// </summary>
+    int y = 2;
+
+    /// <summary>
+    /// Вектор предположения сети. Нормализованный.
+    /// </summary>
+    Matrix z;
     void ForwardPropogation()
     {   
         // Проход:
-        for (int i = 0; i < t.Count; i++)
+        for (int i = 0; i < t.Count-1; i++)
         {
-            t[i+1] = h[i] * W[i] + B[i];    // Осторожно, h[0] должен быть таким же как t[0], это входной слой.
+            t[i+1] = h[i] ^ W[i] + B[i];    // Осторожно, h[0] должен быть таким же как t[0], это входной слой.
             h[i+1] = Sigmoid(t[i + 1]);
         }
         Matrix lastLayer = t[t.Count - 1];  // последний слой, к которому не применялась функция активации.
-        Matrix z = SoftMax(lastLayer);
-
-        // One hot encoding
-        int y = 2; // индекс истиной категории поданного на вход изображения
+        z = SoftMax(lastLayer);
 
         // Вычисление ошибки:
         Double Error = CrossEntropy(z, y);
     }
+
+    
+    void BackPropogation()
+    {
+        // One hot encoding
+        Matrix y_full = to_full(y);
+
+        // Последний слой:
+        Matrix dE_dt = z - y_full;
+        Matrix dE_dW = h[t.Count - 2].T() ^ dE_dt;
+        Matrix dE_dB = dE_dt;
+        ApplyGradientStep(dE_dW, dE_dB, t.Count-2);
+        Matrix dE_dh = dE_dt ^ W[t.Count - 2].T();
+        dE_dt = dE_dh * Sigmoid_deriv(t[t.Count - 2]);
+
+        //
+        for (int i = t.Count-3; i >= 1; i--)
+        {
+            dE_dW = h[i].T() ^ dE_dt;
+            dE_dB = dE_dt;
+            ApplyGradientStep(dE_dW, dE_dB, i);
+            dE_dh = dE_dt ^ W[i].T();
+            dE_dt = dE_dh * Sigmoid_deriv(t[i]);
+        }
+
+        // Первый слой немного отличается:
+        dE_dW = h[0].T() ^ dE_dt;
+        dE_dB = dE_dt;
+        ApplyGradientStep(dE_dW, dE_dB, 0);
+    }
+
+
 }

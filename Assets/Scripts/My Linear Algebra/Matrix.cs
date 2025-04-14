@@ -33,7 +33,36 @@ public class Matrix
 
         return new Matrix(result);
     }
+    public static Matrix operator -(Matrix a, Matrix b)
+    {
+        if (a.rows != b.rows || a.columns != b.columns)
+            throw new ArgumentException("Matrix dimensions must agree.");
 
+        double[,] result = new double[a.rows, a.columns];
+        for (int i = 0; i < a.rows; i++)
+            for (int j = 0; j < a.columns; j++)
+                result[i, j] = a.data[i, j] - b.data[i, j];
+
+        return new Matrix(result);
+    }
+    public static Matrix operator -(Matrix a, double b)
+    {
+        double[,] result = new double[a.rows, a.columns];
+        for (int i = 0; i < a.rows; i++)
+            for (int j = 0; j < a.columns; j++)
+                result[i, j] = a.data[i, j] - b;
+
+        return new Matrix(result);
+    }
+    public static Matrix operator -(double a, Matrix b)
+    {
+        double[,] result = new double[b.rows, b.columns];
+        for (int i = 0; i < b.rows; i++)
+            for (int j = 0; j < b.columns; j++)
+                result[i, j] = a - b.data[i, j];
+
+        return new Matrix(result);
+    }
 
     public static Matrix operator +(Matrix a, double b)
     {
@@ -64,8 +93,10 @@ public class Matrix
         return new Matrix(result);
     }
 
-
-    public static Matrix operator *(Matrix a, Matrix b)
+    /// <summary>
+    /// Матричное перемножение
+    /// </summary>
+    public static Matrix operator ^(Matrix a, Matrix b)
     {
         if (a.columns != b.rows)
             throw new ArgumentException("Invalid matrix multiplication dimensions");
@@ -83,6 +114,34 @@ public class Matrix
         }
         return new Matrix(result);
     }
+    /// <summary>
+    /// Поэлементное перемножение.
+    /// </summary>
+    public static Matrix operator *(Matrix a, Matrix b)
+    {
+        if (a.rows != b.rows || a.columns != b.columns)
+            throw new ArgumentException("Matrix dimensions must agree.");
+
+        double[,] result = new double[a.rows, a.columns];
+        for (int i = 0; i < a.rows; i++)
+        {
+            for (int j = 0; j < a.columns; j++)
+            {
+                result[i, j] = a.data[i, j] * b.data[i, j];
+            }
+        }
+        return new Matrix(result);
+    }
+    public static Matrix operator *(double a, Matrix b)
+    {
+        double[,] result = new double[b.rows, b.columns];
+        for (int i = 0; i < b.rows; i++)
+            for (int j = 0; j < b.columns; j++)
+                result[i, j] = a * b.data[i, j];
+
+        return new Matrix(result);
+    }
+
     public static Matrix operator /(Matrix a, double b)
     {
         double[,] result = new double[a.rows, a.columns];
