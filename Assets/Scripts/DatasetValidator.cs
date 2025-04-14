@@ -72,7 +72,7 @@ public class DatasetValidator : MonoBehaviour
 
     /* ---------------------- Итог ----------------------*/
     [Header("Итог:")]
-    [Tooltip("Общее разрешение изображений.")]
+    [Tooltip("Разрешение изображений.")]
     public Vector2Int imageSize;
 
     [Tooltip("Вердикт проверки.")]
