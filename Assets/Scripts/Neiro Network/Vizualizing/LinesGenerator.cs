@@ -14,67 +14,97 @@ public class LinesGenerator : MonoBehaviour
     [Tooltip("Визуализатор слоёв.")]
     [Inject] LayersGenerator layersGenerator;
 
-    [Header("Transform-контейнер для линий")]
-    [SerializeField] Transform linesContainer;
+    [Header("Материал для отрисовки линий (должен быть без ZTest и с поддержкой цвета)")]
+    [SerializeField] Material lineMaterial;
 
-    [Header("Настройки соединений")]
-    [Range(0f, 1f)]
-    [Tooltip("Плотность соединений между нейронами (0 - ничего, 1 - всё).")]
-    [SerializeField] float connectionDensity = 1f;
+    [Header("Максимальное кол-во линий между слоями:")]
+    [Range(0, 80)]
+    [SerializeField] int maxLinesBetweenLayers = 100;
 
-    private List<GameObject> lines3D;
+    private struct LineData
+    {
+        public Vector3 from;
+        public Vector3 to;
+        public Color color;
+    }
+
+    private List<LineData> lines;
 
     private void Start()
     {
-        lines3D = new List<GameObject>();
+        lines = new List<LineData>();
     }
 
     public void DrawConnections(List<Matrix> weights)
     {
+        lines.Clear();
+
         int startIndex = 0;
         Vector2Int imgSize = datasetValidator.imageSize;
-        int inputCount = imgSize.x * imgSize.y;
-
-        System.Random rng = new System.Random(); // Можно заменить на UnityEngine.Random если нужно
 
         for (int layer = 0; layer < weights.Count; layer++)
         {
             int prevCount = weights[layer].GetLength(0);
             int currCount = weights[layer].GetLength(1);
 
-            for (int i = 0; i < prevCount; i++)
+            int totalPossible = prevCount * currCount;
+
+            // Выбираем только maxLinesBetweenLayers случайных связей
+            int linesToDraw = Mathf.Min(maxLinesBetweenLayers, totalPossible);
+            HashSet<(int, int)> selectedPairs = new HashSet<(int, int)>();
+
+            System.Random rand = new System.Random();
+
+            while (selectedPairs.Count < linesToDraw)
             {
+                int i = rand.Next(prevCount);
+                int j = rand.Next(currCount);
+                selectedPairs.Add((i, j)); // HashSet автоматически исключает дубликаты
+            }
+
+            foreach (var pair in selectedPairs)
+            {
+                int i = pair.Item1;
+                int j = pair.Item2;
+
                 Vector3 from = layersGenerator.pixels3D[startIndex + i].transform.position;
+                Vector3 to = layersGenerator.pixels3D[startIndex + prevCount + j].transform.position;
 
-                for (int j = 0; j < currCount; j++)
+                float weight = (float)weights[layer][i, j];
+                Color color = gradientColorPicker.GetColor(weight);
+
+                lines.Add(new LineData
                 {
-                    // Ограничиваем количество соединений по плотности
-                    if (connectionDensity < 1f && rng.NextDouble() > connectionDensity)
-                        continue;
-
-                    Vector3 to = layersGenerator.pixels3D[startIndex + prevCount + j].transform.position;
-
-                    float weight = (float)weights[layer][i, j];
-                    Color color = gradientColorPicker.GetColor(weight);
-
-                    GameObject lineObj = new GameObject($"Weight_{layer}_{i}_{j}");
-                    lineObj.transform.SetParent(linesContainer, false);
-
-                    var lr = lineObj.AddComponent<LineRenderer>();
-                    lr.positionCount = 2;
-                    lr.SetPositions(new[] { from, to });
-
-                    lr.startWidth = 0.02f;
-                    lr.endWidth = 0.02f;
-                    lr.material = new Material(Shader.Find("Sprites/Default"));
-                    lr.startColor = color;
-                    lr.endColor = color;
-
-                    lines3D.Add(lineObj);
-                }
+                    from = from,
+                    to = to,
+                    color = color
+                });
             }
 
             startIndex += prevCount;
         }
+    }
+
+
+
+    private void OnRenderObject()
+    {
+        if (lines == null || lines.Count == 0 || lineMaterial == null)
+            return;
+
+        lineMaterial.SetPass(0);
+        GL.PushMatrix();
+        GL.MultMatrix(transform.localToWorldMatrix);
+        GL.Begin(GL.LINES);
+
+        foreach (var line in lines)
+        {
+            GL.Color(line.color);
+            GL.Vertex(line.from);
+            GL.Vertex(line.to);
+        }
+
+        GL.End();
+        GL.PopMatrix();
     }
 }
