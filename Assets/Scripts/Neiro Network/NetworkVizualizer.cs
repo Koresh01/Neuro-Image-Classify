@@ -1,26 +1,26 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using System.Collections.Generic;
 using Zenject;
 
-[AddComponentMenu("Custom/Network Vizualizer (Отрисовка состояния сети)")]
+[AddComponentMenu("Custom/Network Vizualizer (РћС‚СЂРёСЃРѕРІРєР° СЃРѕСЃС‚РѕСЏРЅРёСЏ СЃРµС‚Рё)")]
 public class NetworkVizualizer : MonoBehaviour
 {
-    [Tooltip("Нейронная сеть со всеми слоями/весами...")]
+    [Tooltip("РќРµР№СЂРѕРЅРЅР°СЏ СЃРµС‚СЊ СЃРѕ РІСЃРµРјРё СЃР»РѕСЏРјРё/РІРµСЃР°РјРё...")]
     [Inject] Network network;
 
-    [Tooltip("Получатель цвета:")]
+    [Tooltip("РџРѕР»СѓС‡Р°С‚РµР»СЊ С†РІРµС‚Р°:")]
     [Inject] GradientColorPicker gradientColorPicker;
 
-    [Tooltip("Валидатор датасета.")]
+    [Tooltip("Р’Р°Р»РёРґР°С‚РѕСЂ РґР°С‚Р°СЃРµС‚Р°.")]
     [Inject] DatasetValidator datasetValidator;
 
-    [Header("Transform-контейнер для пикселей")]
+    [Header("Transform-РєРѕРЅС‚РµР№РЅРµСЂ РґР»СЏ РїРёРєСЃРµР»РµР№")]
     [SerializeField] Transform pixelsContainer;
 
-    [Header("Transform-контейнер для линий")]
+    [Header("Transform-РєРѕРЅС‚РµР№РЅРµСЂ РґР»СЏ Р»РёРЅРёР№")]
     [SerializeField] Transform connectionContainer;
 
-    [Header("Префаб пикселя.")]
+    [Header("РџСЂРµС„Р°Р± РїРёРєСЃРµР»СЏ.")]
     [SerializeField] GameObject pixelPrefab;
 
     [Range(1f, 2f), SerializeField] float pixelsOffset;
@@ -56,19 +56,20 @@ public class NetworkVizualizer : MonoBehaviour
     }
 
     /// <summary>
-    /// Отрисовка нейронов.
+    /// РћС‚СЂРёСЃРѕРІРєР° РЅРµР№СЂРѕРЅРѕРІ.
     /// </summary>
     private void DrawPixels(List<Matrix> activations)
     {
         Quaternion prefabRotation = pixelPrefab.transform.rotation;
 
-        // Входной слой — рисуем изображение как есть
+        // Р’С…РѕРґРЅРѕР№ СЃР»РѕР№ вЂ” СЂРёСЃСѓРµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ РєР°Рє РµСЃС‚СЊ
         Vector2Int imgSize = datasetValidator.imageSize;
         for (int y = 0; y < imgSize.y; y++)
         {
             for (int x = 0; x < imgSize.x; x++)
             {
                 Vector3 pos = new Vector3(x * pixelsOffset, y * pixelsOffset, 0);
+                pos -= new Vector3(imgSize.x / 2f, imgSize.y / 2f, 0) * pixelsOffset;
                 GameObject pixel = Instantiate(pixelPrefab, pos, prefabRotation, pixelsContainer);
 
 
@@ -80,7 +81,7 @@ public class NetworkVizualizer : MonoBehaviour
             }
         }
 
-        // Скрытые и выходной слои — рисуем квадратиками в глубину
+        // РЎРєСЂС‹С‚С‹Рµ Рё РІС‹С…РѕРґРЅРѕР№ СЃР»РѕРё вЂ” СЂРёСЃСѓРµРј РєРІР°РґСЂР°С‚РёРєР°РјРё РІ РіР»СѓР±РёРЅСѓ
         for (int layerInx = 1; layerInx < activations.Count-1; layerInx++)
         {
             int neurons = activations[layerInx].GetLength(1);
@@ -91,6 +92,7 @@ public class NetworkVizualizer : MonoBehaviour
                 int x = i % side;
                 int y = i / side;
                 Vector3 pos = new Vector3(x * pixelsOffset, y * pixelsOffset, layerInx * Mathf.Max(imgSize.x, imgSize.y));
+                pos -= new Vector3(side/2f, side / 2f, 0) * pixelsOffset;
                 GameObject pixel = Instantiate(pixelPrefab, pos, prefabRotation, pixelsContainer);
 
                 float value = (float)activations[layerInx][0, i];
@@ -101,22 +103,24 @@ public class NetworkVizualizer : MonoBehaviour
             }
         }
 
-        // Последний слой рисуем ввиде линии:
-        for (int x = 0; x < activations[activations.Count-1].GetLength(1); x++)
+        // РџРѕСЃР»РµРґРЅРёР№ СЃР»РѕР№ СЂРёСЃСѓРµРј РІРІРёРґРµ Р»РёРЅРёРё:
+        int OUT_DIM = activations[activations.Count - 1].GetLength(1);
+        for (int x = 0; x < OUT_DIM; x++)
         {
             Vector3 pos = new Vector3(x * pixelsOffset, 0, (activations.Count - 1) * Mathf.Max(imgSize.x, imgSize.y));
+            pos -= new Vector3(OUT_DIM/2f, 0, 0) * pixelsOffset;
             GameObject pixel = Instantiate(pixelPrefab, pos, prefabRotation, pixelsContainer);
             pixels3D.Add(pixel);
         }
     }
 
     /// <summary>
-    /// Отрисовка связей между слоями.
+    /// РћС‚СЂРёСЃРѕРІРєР° СЃРІСЏР·РµР№ РјРµР¶РґСѓ СЃР»РѕСЏРјРё.
     /// </summary>
     private void DrawConnections(List<Matrix> weights)
     {
-        // Первый слой — связи от входа к первому скрытому
-        int startIndex = 0; // откуда брать пиксели
+        // РџРµСЂРІС‹Р№ СЃР»РѕР№ вЂ” СЃРІСЏР·Рё РѕС‚ РІС…РѕРґР° Рє РїРµСЂРІРѕРјСѓ СЃРєСЂС‹С‚РѕРјСѓ
+        int startIndex = 0; // РѕС‚РєСѓРґР° Р±СЂР°С‚СЊ РїРёРєСЃРµР»Рё
         Vector2Int imgSize = datasetValidator.imageSize;
         int inputCount = imgSize.x * imgSize.y;
 

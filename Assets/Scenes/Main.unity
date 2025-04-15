@@ -2501,8 +2501,6 @@ MonoBehaviour:
   - rows: 0
     columns: 0
   - rows: 1
-    columns: 1600
-  - rows: 1
     columns: 2500
   - rows: 0
     columns: 0
