@@ -596,6 +596,8 @@ MonoBehaviour:
   datasetValidator: {fileID: 248596632}
   network: {fileID: 1574905470}
   gradientColorPicker: {fileID: 1625812878}
+  layersGenerator: {fileID: 890076928}
+  connectionsGenerator: {fileID: 1572605489}
 --- !u!1 &430763433
 GameObject:
   m_ObjectHideFlags: 0
@@ -1587,6 +1589,53 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   popUpPanelsController: {fileID: 2128499937}
+--- !u!1 &890076926
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 890076927}
+  - component: {fileID: 890076928}
+  m_Layer: 0
+  m_Name: Layers Generator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &890076927
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890076926}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2018417801}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &890076928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890076926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1cb0088378c6ec42b2d72904dc309d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pixelPrefab: {fileID: 6918904163051849836, guid: 5273f8e1a77ea334da80ecb69ec4b386, type: 3}
+  pixelsContainer: {fileID: 896133365}
+  pixelsOffset: 1.4
 --- !u!1 &896133364
 GameObject:
   m_ObjectHideFlags: 0
@@ -2453,6 +2502,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1479064038}
   m_CullTransparentMesh: 1
+--- !u!1 &1572605487
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1572605488}
+  - component: {fileID: 1572605489}
+  m_Layer: 0
+  m_Name: Lines Generator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1572605488
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1572605487}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2018417801}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1572605489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1572605487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d51b316675507c4aa07164ab524e15a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  linesContainer: {fileID: 56813771}
+  connectionDensity: 0.001
 --- !u!1 &1574905468
 GameObject:
   m_ObjectHideFlags: 0
@@ -2501,7 +2596,11 @@ MonoBehaviour:
   - rows: 0
     columns: 0
   - rows: 1
-    columns: 2500
+    columns: 169
+  - rows: 1
+    columns: 256
+  - rows: 1
+    columns: 9
   - rows: 0
     columns: 0
   h: []
@@ -2914,7 +3013,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 890076927}
+  - {fileID: 1572605488}
   m_Father: {fileID: 961352074}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2018417802
@@ -2929,10 +3030,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4b9102326da1124390aa6b5efa04eca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pixelsContainer: {fileID: 896133365}
-  connectionContainer: {fileID: 56813771}
-  pixelPrefab: {fileID: 6918904163051849836, guid: 5273f8e1a77ea334da80ecb69ec4b386, type: 3}
-  pixelsOffset: 1.5
 --- !u!1 &2113920143
 GameObject:
   m_ObjectHideFlags: 0
