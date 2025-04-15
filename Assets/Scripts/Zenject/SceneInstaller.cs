@@ -9,9 +9,13 @@ public class SceneInstaller : MonoInstaller
 
     [Tooltip("Нейронная сеть.")]
     [SerializeField] private Network network;
+
+    [Tooltip("Контроллер получения цветов.")]
+    [SerializeField] private GradientColorPicker gradientColorPicker;
     public override void InstallBindings()
     {
         Container.Bind<DatasetValidator>().FromInstance(datasetValidator).AsSingle();
         Container.Bind<Network>().FromInstance(network).AsSingle();
+        Container.Bind<GradientColorPicker>().FromInstance(gradientColorPicker).AsSingle();
     }
 }

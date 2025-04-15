@@ -7,14 +7,14 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Custom_UnlitColorInstanced
-  m_Shader: {fileID: 4800000, guid: 42e766f70f7800c47a36e69ca8e36d52, type: 3}
+  m_Name: UnlitDoubleSided
+  m_Shader: {fileID: 4800000, guid: ffc560c5a3f835b4894fde0663445f77, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 1
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
