@@ -2,24 +2,21 @@
 using UnityEngine;
 using Zenject;
 
-[AddComponentMenu("Custom/LinesGenerator (Отрисовщик линий-весов нейросети)")]
+[AddComponentMenu("Custom/LinesGenerator (Рисует связи нейросети)")]
 public class LinesGenerator : MonoBehaviour
 {
-    [Tooltip("Получатель цвета:")]
-    [Inject] GradientColorPicker gradientColorPicker;
-
-    [Tooltip("Валидатор датасета.")]
+    [Inject] GradientColorPicker colorPicker;
     [Inject] DatasetValidator datasetValidator;
+    [Inject] LayersGenerator layerVisualizer;
 
-    [Tooltip("Визуализатор слоёв.")]
-    [Inject] LayersGenerator layersGenerator;
-
-    [Header("Материал для отрисовки линий (должен быть без ZTest и с поддержкой цвета)")]
+    [Header("Материал для линий")]
     [SerializeField] Material lineMaterial;
 
-    [Header("Максимальное кол-во линий между слоями:")]
-    [Range(0, 80)]
-    [SerializeField] int maxLinesBetweenLayers = 100;
+    [Header("Максимум соединений между слоями")]
+    [Range(0, 100)]
+    [SerializeField] int maxConnectionsPerLayer = 50;
+
+    private List<LineData> lines = new();
 
     private struct LineData
     {
@@ -28,68 +25,42 @@ public class LinesGenerator : MonoBehaviour
         public Color color;
     }
 
-    private List<LineData> lines;
-
-    private void Start()
-    {
-        lines = new List<LineData>();
-    }
-
     public void DrawConnections(List<Matrix> weights)
     {
         lines.Clear();
 
-        int startIndex = 0;
-        Vector2Int imgSize = datasetValidator.imageSize;
+        int indexOffset = 0;
 
         for (int layer = 0; layer < weights.Count; layer++)
         {
-            int prevCount = weights[layer].GetLength(0);
-            int currCount = weights[layer].GetLength(1);
+            var weightMatrix = weights[layer];
+            int prevCount = weightMatrix.GetLength(0);
+            int currCount = weightMatrix.GetLength(1);
 
-            int totalPossible = prevCount * currCount;
+            int totalConnections = Mathf.Min(maxConnectionsPerLayer, prevCount * currCount);
+            System.Random rand = new();
 
-            // Выбираем только maxLinesBetweenLayers случайных связей
-            int linesToDraw = Mathf.Min(maxLinesBetweenLayers, totalPossible);
-            HashSet<(int, int)> selectedPairs = new HashSet<(int, int)>();
-
-            System.Random rand = new System.Random();
-
-            while (selectedPairs.Count < linesToDraw)
+            for (int c = 0; c < totalConnections; c++)
             {
                 int i = rand.Next(prevCount);
                 int j = rand.Next(currCount);
-                selectedPairs.Add((i, j)); // HashSet автоматически исключает дубликаты
+
+                Vector3 from = layerVisualizer.pixelPositions[indexOffset + i];
+                Vector3 to = layerVisualizer.pixelPositions[indexOffset + prevCount + j];
+
+                float weight = (float)weightMatrix[i, j];
+                Color color = colorPicker.GetColor(weight);
+
+                lines.Add(new LineData { from = from, to = to, color = color });
             }
 
-            foreach (var pair in selectedPairs)
-            {
-                int i = pair.Item1;
-                int j = pair.Item2;
-
-                Vector3 from = layersGenerator.pixels3D[startIndex + i].transform.position;
-                Vector3 to = layersGenerator.pixels3D[startIndex + prevCount + j].transform.position;
-
-                float weight = (float)weights[layer][i, j];
-                Color color = gradientColorPicker.GetColor(weight);
-
-                lines.Add(new LineData
-                {
-                    from = from,
-                    to = to,
-                    color = color
-                });
-            }
-
-            startIndex += prevCount;
+            indexOffset += prevCount;
         }
     }
 
-
-
     private void OnRenderObject()
     {
-        if (lines == null || lines.Count == 0 || lineMaterial == null)
+        if (lines.Count == 0 || lineMaterial == null)
             return;
 
         lineMaterial.SetPass(0);

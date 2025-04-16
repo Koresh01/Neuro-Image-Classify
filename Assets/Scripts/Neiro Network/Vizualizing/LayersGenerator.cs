@@ -3,105 +3,136 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-
-[AddComponentMenu("Custom/LayersGenerator (Строитель слоёв)")]
+[AddComponentMenu("Custom/LayersGenerator (Рисует слои нейросети)")]
 public class LayersGenerator : MonoBehaviour
 {
-    [Tooltip("Получатель цвета:")]
-    [Inject] GradientColorPicker gradientColorPicker;
-    [Tooltip("Валидатор датасета.")]
+    [Inject] GradientColorPicker colorPicker;
     [Inject] DatasetValidator datasetValidator;
-    // -------------------------------------------------------
-    [Header("Префаб пикселя.")]
-    [SerializeField] GameObject pixelPrefab;
 
-    [Header("Transform-контейнер для пикселей")]
-    [SerializeField] Transform pixelsContainer;
+    [Header("Материал для пикселей")]
+    [SerializeField] Material pixelMaterial;
+
+    [Header("Размер пикселя (plane):")]
+    [Range(0.1f, 2f)] public float pixelSize = 1f;
 
     [Header("Расстояние между пикселями:")]
-    [Range(1f, 2f), SerializeField] float pixelsOffset;
+    [Range(1f, 2f)] public float pixelSpacing = 1.2f;
 
-    [Tooltip("Список пикселей.")]
-    [NonSerialized] public List<GameObject> pixels3D;
+    [NonSerialized] public List<Vector3> pixelPositions = new();
+    [NonSerialized] public List<Color> pixelColors = new();
 
-    private void Start()
-    {
-        pixels3D = new List<GameObject>();
-    }
-
-    /// <summary>
-    /// Создаёт слои нейросети.
-    /// </summary>
-    /// <param name="activations"></param>
     public void DrawLayers(List<Matrix> activations)
     {
-        Quaternion prefabRotation = pixelPrefab.transform.rotation;
+        pixelPositions.Clear();
+        pixelColors.Clear();
 
         Vector2Int imgSize = datasetValidator.imageSize;
 
         // Входной слой
-        CreateInputLayer(activations[0], imgSize, prefabRotation);
+        AddInputLayer(activations[0], imgSize);
 
         // Скрытые слои
-        for (int layerIndex = 1; layerIndex < activations.Count - 1; layerIndex++)
-        {
-            CreateHiddenLayer(activations[layerIndex], layerIndex, imgSize, prefabRotation);
-        }
+        for (int i = 1; i < activations.Count - 1; i++)
+            AddHiddenLayer(activations[i], i, imgSize);
 
         // Выходной слой
-        CreateOutputLayer(activations[^1], activations.Count - 1, imgSize, prefabRotation);
+        AddOutputLayer(activations[^1], activations.Count - 1, imgSize);
     }
 
-    private void CreateInputLayer(Matrix matrix, Vector2Int imgSize, Quaternion rotation)
+    private void AddInputLayer(Matrix matrix, Vector2Int imgSize)
     {
         for (int y = 0; y < imgSize.y; y++)
         {
             for (int x = 0; x < imgSize.x; x++)
             {
-                Vector3 pos = new Vector3(x * pixelsOffset, y * pixelsOffset, 0);
-                pos -= new Vector3(imgSize.x / 2f, imgSize.y / 2f, 0) * pixelsOffset;
+                Vector3 pos = new(
+                    x * pixelSpacing,
+                    y * pixelSpacing,
+                    0);
 
-                CreatePixel(pos, (float)matrix[0, x + y], rotation);
+                pos -= new Vector3(imgSize.x / 2f, imgSize.y / 2f, 0) * pixelSpacing;
+
+                AddPixel(pos, (float)matrix[0, x + y]);
             }
         }
     }
 
-    private void CreateHiddenLayer(Matrix matrix, int layerIndex, Vector2Int imgSize, Quaternion rotation)
+    private void AddHiddenLayer(Matrix matrix, int layerIndex, Vector2Int imgSize)
     {
-        int neurons = matrix.GetLength(1);
-        int side = Mathf.CeilToInt(Mathf.Sqrt(neurons));
+        int count = matrix.GetLength(1);
+        int side = Mathf.CeilToInt(Mathf.Sqrt(count));
 
-        for (int i = 0; i < neurons; i++)
+        for (int i = 0; i < count; i++)
         {
             int x = i % side;
             int y = i / side;
 
-            Vector3 pos = new Vector3(x * pixelsOffset, y * pixelsOffset, layerIndex * Mathf.Max(imgSize.x, imgSize.y));
-            pos -= new Vector3(side / 2f, side / 2f, 0) * pixelsOffset;
+            Vector3 pos = new(
+                x * pixelSpacing,
+                y * pixelSpacing,
+                layerIndex * Mathf.Max(imgSize.x, imgSize.y));
 
-            CreatePixel(pos, (float)matrix[0, i], rotation);
+            pos -= new Vector3(side / 2f, side / 2f, 0) * pixelSpacing;
+
+            AddPixel(pos, (float)matrix[0, i]);
         }
     }
 
-    private void CreateOutputLayer(Matrix matrix, int layerIndex, Vector2Int imgSize, Quaternion rotation)
+    private void AddOutputLayer(Matrix matrix, int layerIndex, Vector2Int imgSize)
     {
-        int outDim = matrix.GetLength(1);
+        int count = matrix.GetLength(1);
 
-        for (int x = 0; x < outDim; x++)
+        for (int x = 0; x < count; x++)
         {
-            Vector3 pos = new Vector3(x * pixelsOffset, 0, layerIndex * Mathf.Max(imgSize.x, imgSize.y));
-            pos -= new Vector3(outDim / 2f, 0, 0) * pixelsOffset;
+            Vector3 pos = new(
+                x * pixelSpacing,
+                0,
+                layerIndex * Mathf.Max(imgSize.x, imgSize.y));
 
-            CreatePixel(pos, (float)matrix[0, x], rotation);
+            pos -= new Vector3(count / 2f, 0, 0) * pixelSpacing;
+
+            AddPixel(pos, (float)matrix[0, x]);
         }
     }
 
-    private void CreatePixel(Vector3 position, float value, Quaternion rotation)
+    private void AddPixel(Vector3 pos, float value)
     {
-        GameObject pixel = Instantiate(pixelPrefab, position, rotation, pixelsContainer);
-        pixel.GetComponent<Renderer>().material.color = gradientColorPicker.GetColor(value);
-        pixels3D.Add(pixel);
+        pixelPositions.Add(pos);
+        pixelColors.Add(colorPicker.GetColor(value));
     }
 
+    private void OnRenderObject()
+    {
+        if (pixelPositions.Count == 0)
+            return;
 
+        pixelMaterial.SetPass(0);
+
+        GL.PushMatrix();
+        GL.MultMatrix(transform.localToWorldMatrix);
+        GL.Begin(GL.QUADS);
+
+        for (int i = 0; i < pixelPositions.Count; i++)
+        {
+            GL.Color(pixelColors[i]);
+            DrawQuad(pixelPositions[i], pixelSize);
+        }
+
+        GL.End();
+        GL.PopMatrix();
+    }
+
+    private void DrawQuad(Vector3 center, float size)
+    {
+        float half = size / 2f;
+
+        Vector3 right = Vector3.right * half;
+        Vector3 up = Vector3.up * half;
+
+        // Меняем порядок вершин на противоположный (против часовой стрелки)
+        GL.Vertex(center - right + up);
+        GL.Vertex(center + right + up);
+        GL.Vertex(center + right - up);
+        GL.Vertex(center - right - up);
+    }
 }
