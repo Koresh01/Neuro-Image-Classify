@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Events;
 using Zenject;
@@ -43,11 +44,17 @@ public class Network : MonoBehaviour
     void Init()
     {
         if (datasetValidator.isValid)
-        { 
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             InitIntermediateLayers();
             InitActivatedLayers();
             InitWeights();
             InitBiases();
+
+            stopwatch.Stop();
+            UnityEngine.Debug.Log($"Создание матриц Numpy: {stopwatch.Elapsed.TotalSeconds} секунд");
 
             onReady?.Invoke();
         }
@@ -58,8 +65,6 @@ public class Network : MonoBehaviour
     /// </summary>
     void InitIntermediateLayers()
     {
-        // s.Clear();
-
         int inputDim = datasetValidator.imageSize[0] * datasetValidator.imageSize[1];
         int outputDim = datasetValidator.categoryNames.Count;
 

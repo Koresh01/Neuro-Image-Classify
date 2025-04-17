@@ -257,9 +257,6 @@ public class DatasetValidator : MonoBehaviour
             }
         }
     }
-
-
-
     #endregion
 
 

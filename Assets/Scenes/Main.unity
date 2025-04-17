@@ -2485,7 +2485,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineMaterial: {fileID: 2100000, guid: 4a5df3d93df259c4291edf70843ae9d6, type: 2}
-  maxConnectionsPerLayer: 50
+  maxConnectionsPerLayer: 150
 --- !u!1 &1574905468
 GameObject:
   m_ObjectHideFlags: 0

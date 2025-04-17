@@ -13,10 +13,15 @@ public class LinesGenerator : MonoBehaviour
     [SerializeField] Material lineMaterial;
 
     [Header("Максимум соединений между слоями")]
-    [Range(0, 100)]
+    [Range(0, 10000)]
     [SerializeField] int maxConnectionsPerLayer = 50;
 
     private List<LineData> lines = new();
+
+    /// <summary>
+    /// Детеминированный генератор — фиксированное поведение
+    /// </summary>
+    private System.Random rand;
 
     private struct LineData
     {
@@ -25,9 +30,10 @@ public class LinesGenerator : MonoBehaviour
         public Color color;
     }
 
-    public void DrawConnections(List<Matrix> weights)
+    public void DrawLines(List<Matrix> weights)
     {
         lines.Clear();
+        rand = new System.Random(12345);    // чтоб трогать одни и те же линии
 
         int indexOffset = 0;
 
@@ -38,7 +44,6 @@ public class LinesGenerator : MonoBehaviour
             int currCount = weightMatrix.GetLength(1);
 
             int totalConnections = Mathf.Min(maxConnectionsPerLayer, prevCount * currCount);
-            System.Random rand = new();
 
             for (int c = 0; c < totalConnections; c++)
             {
