@@ -12,9 +12,10 @@ public class FreeCameraController : MonoBehaviour
 
     [Header("UI Activation Area")]
     public RectTransform activationArea;
-    public GraphicRaycaster raycaster; // 🔸 Добавим это
+    public GraphicRaycaster raycaster;
 
     private bool isControlEnabled = false;
+    private bool justEnabledControl = false;
 
     void Start()
     {
@@ -28,14 +29,14 @@ public class FreeCameraController : MonoBehaviour
 
     void HandleInput()
     {
-        // ESC - выйти из режима управления
+        // ESC — выйти из режима управления
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             EnableCursor(true);
             return;
         }
 
-        // Если курсор активен — ждём клика по RectTransform (без UI сверху)
+        // Клик по области без UI — включаем управление
         if (!isControlEnabled && Input.GetMouseButtonDown(0))
         {
             if (ClickedOnThisRectOnly(activationArea))
@@ -68,6 +69,13 @@ public class FreeCameraController : MonoBehaviour
 
     void HandleMouseLook()
     {
+        // Пропустить первый кадр после включения управления
+        if (justEnabledControl)
+        {
+            justEnabledControl = false;
+            return;
+        }
+
         float mouseX = Input.GetAxis("Mouse X") * lookSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity;
 
@@ -84,9 +92,12 @@ public class FreeCameraController : MonoBehaviour
         isControlEnabled = !enable;
         Cursor.lockState = enable ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = enable;
+
+        if (!enable)
+            justEnabledControl = true; // Активируем флаг пропуска одного кадра
     }
 
-    // 🔍 Проверка: клик был именно по нашей области, а не по другим UI
+    // Проверка: был ли клик именно по нашей области, без других UI-элементов сверху
     bool ClickedOnThisRectOnly(RectTransform targetRect)
     {
         PointerEventData pointerData = new PointerEventData(EventSystem.current)
@@ -101,7 +112,6 @@ public class FreeCameraController : MonoBehaviour
         {
             if (result.gameObject == null) continue;
 
-            // если сверху что-то другое — не включаем управление
             if (result.gameObject.transform != targetRect)
                 return false;
         }
