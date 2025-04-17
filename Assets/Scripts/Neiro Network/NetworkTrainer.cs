@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
@@ -11,40 +12,13 @@ class NetworkTrainer : MonoBehaviour
     [Inject] DatasetValidator datasetValidator;
     [Inject] NetworkVizualizer networkVizualizer;
     [Inject] Network network;
+    [Inject] ImageProcessor imageProcessor; // Sinleton, т.к. он не наследуется от MonoBehaviour
 
-    // Индекс текущего изображения для поэтапного обучения
     private int currentImageIndex = 0;
 
-    /// <summary>
-    /// Преобразует изображение из файла в входной вектор (матрицу) для нейросети.
-    /// </summary>
-    Matrix ConvertImageToInputMatrix(string path)
-    {
-        byte[] fileData = File.ReadAllBytes(path);
-        Texture2D imgTexture = new Texture2D(2, 2);
-        imgTexture.LoadImage(fileData);
 
-        Matrix inputImageMatrix = Numpy.Zeros(1, network.h[0].GetLength(1));
-        for (int x = 0; x < imgTexture.width; x++)
-        {
-            for (int y = 0; y < imgTexture.height; y++)
-            {
-                int i = y * imgTexture.width + x;
-
-                Color pixel = imgTexture.GetPixel(x, y);
-                inputImageMatrix[0, i] = (pixel.r + pixel.g + pixel.b) / 3f;
-            }
-        }
-
-        return inputImageMatrix;
-    }
-
-    /// <summary>
-    /// Выполняет один шаг обучения на следующем изображении из датасета.
-    /// Можно вызывать через контекстное меню в редакторе Unity.
-    /// </summary>
     [ContextMenu("Один шаг обучения")]
-    void Fit()
+    public async void Fit()
     {
         if (currentImageIndex >= datasetValidator.trainImagesPaths.Count)
         {
@@ -52,35 +26,38 @@ class NetworkTrainer : MonoBehaviour
             return;
         }
 
+        // Получаем данные для изображения
         ImageData imgData = datasetValidator.trainImagesPaths[currentImageIndex];
         int trueLabel = imgData.y;
         string path = imgData.path;
 
         // Подготовка входных данных
-        network.h[0] = ConvertImageToInputMatrix(path);
+        int width = network.h[0].GetLength(1);
+        network.h[0] = imageProcessor.ConvertImageToInputMatrix(path, width);
 
-        // Обучение
-        PredictionResult res = network.Fit(trueLabel);
+        // Асинхронное выполнение обучения нейросети
+        PredictionResult res = await Task.Run(() => network.Fit(trueLabel));
+
+        // Логирование результата
         Debug.Log($"[{currentImageIndex + 1}/{datasetValidator.trainImagesPaths.Count}] " +
                   $"Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {res.PredictedCategoryIndex}");
 
-        // Визуализация
+        // Визуализация после обучения
         networkVizualizer.Vizualize();
 
+        // Переход к следующему изображению
         currentImageIndex++;
     }
 
-    /// <summary>
-    /// Запускает полное обучение на всех изображениях из датасета.
-    /// </summary>
     // [ContextMenu("Полное обучение")]
-    void TrainAll()
+    async void TrainAll()
     {
         currentImageIndex = 0;
 
         while (currentImageIndex < datasetValidator.trainImagesPaths.Count)
         {
-            Fit();
+            // Дожидаемся завершения каждого шага обучения
+            await Task.Run(() => Fit());
         }
 
         Debug.Log("Полное обучение завершено.");
