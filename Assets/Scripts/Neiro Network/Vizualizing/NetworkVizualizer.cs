@@ -28,15 +28,15 @@ public class NetworkVizualizer : MonoBehaviour
     }
 
     [ContextMenu("Переотрисовать нейронку.")]
-    private void Vizualize()
+    public void Vizualize()
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
+        //Stopwatch stopwatch = new Stopwatch();
+        //stopwatch.Start();
 
         RedrawNetwork(network.h, network.W);
 
-        stopwatch.Stop();
-        UnityEngine.Debug.Log($"Отрисовки линий и пикселей: {stopwatch.Elapsed.TotalSeconds} секунд");
+        //stopwatch.Stop();
+        //UnityEngine.Debug.Log($"Отрисовки линий и пикселей: {stopwatch.Elapsed.TotalSeconds} секунд");
     }
 
     public void RedrawNetwork(List<Matrix> activations, List<Matrix> weights)

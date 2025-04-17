@@ -52,7 +52,7 @@ public class LayersGenerator : MonoBehaviour
 
                 pos -= new Vector3(imgSize.x / 2f, imgSize.y / 2f, 0) * pixelSpacing;
 
-                AddPixel(pos, (float)matrix[0, x + y]);
+                AddPixel(pos, (float)matrix[0, y * imgSize.x + x]);
             }
         }
     }

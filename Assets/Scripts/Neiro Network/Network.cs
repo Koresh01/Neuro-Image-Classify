@@ -1,9 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Events;
 using Zenject;
+
+/// <summary>
+/// Результат предсказания нейросети после одного шага обучения.
+/// </summary>
+public class PredictionResult
+{
+    /// <summary>
+    /// Индекс правильной категории (истинная метка).
+    /// </summary>
+    public int TrueLabelIndex;
+
+    /// <summary>
+    /// Индекс предсказанной категории.
+    /// </summary>
+    public int PredictedCategoryIndex;
+
+    /// <summary>
+    /// Значение функции потерь (Cross-Entropy Loss).
+    /// </summary>
+    public float Error;
+}
+
+
 
 /// <summary>
 /// Нейросеть обучаемая.
@@ -26,6 +50,17 @@ public class Network : MonoBehaviour
 
     [Header("Нелинейности:")]
     public List<Matrix> B;
+
+    [Header("Предположение нейросети:")]
+    /// <summary>
+    /// Истиный индекс категории изображения.
+    /// </summary>
+    int y;
+
+    /// <summary>
+    /// Вектор предположения сети. Нормализованный.
+    /// </summary>
+    Matrix z;
 
     void OnEnable()
     {
@@ -186,28 +221,22 @@ public class Network : MonoBehaviour
 
 
 
-    /// <summary>
-    /// Истиный индекс категории изображения.
-    /// </summary>
-    int y = 2;
 
-    /// <summary>
-    /// Вектор предположения сети. Нормализованный.
-    /// </summary>
-    Matrix z;
+
+    
     void ForwardPropogation()
     {   
         // Проход:
         for (int i = 0; i < t.Count-1; i++)
         {
-            t[i+1] = h[i] ^ W[i] + B[i];    // Осторожно, h[0] должен быть таким же как t[0], это входной слой.
+            t[i+1] = (h[i] ^ W[i]) + B[i];    // Осторожно, h[0] должен быть таким же как t[0], это входной слой.
             h[i+1] = Sigmoid(t[i + 1]);
         }
         Matrix lastLayer = t[t.Count - 1];  // последний слой, к которому не применялась функция активации.
         z = SoftMax(lastLayer);
 
         // Вычисление ошибки:
-        Double Error = CrossEntropy(z, y);
+        // Double Error = CrossEntropy(z, y);
     }
 
     
@@ -239,6 +268,40 @@ public class Network : MonoBehaviour
         dE_dB = dE_dt;
         ApplyGradientStep(dE_dW, dE_dB, 0);
     }
+
+
+    /// <summary>
+    /// Выполняет один шаг обучения на одном примере и возвращает результат.
+    /// </summary>
+    /// <param name="trueLabelIndex">Индекс истинной категории (ground truth).</param>
+    /// <returns>Результат предсказания нейросети.</returns>
+    public PredictionResult Fit(int trueLabelIndex)
+    {
+        // Устанавливаем правильный индекс категории для текущего изображения
+        this.y = trueLabelIndex;
+
+        // Прямой и обратный проходы
+        ForwardPropogation();
+        BackPropogation();
+
+        // Индекс категории, предсказанный нейросетью
+        int predictedLabelIndex = Numpy.argmax(z);
+
+        // Значение функции потерь (Cross-Entropy)
+        float crossEntropyLoss = (float)CrossEntropy(z, trueLabelIndex);
+
+        // Название предсказанной категории
+        // string predictedCategoryName = datasetValidator.GetCategoryNameByIndex(predictedLabelIndex);
+
+        // Возвращаем результат обучения
+        return new PredictionResult
+        {
+            TrueLabelIndex = trueLabelIndex,
+            PredictedCategoryIndex = predictedLabelIndex,
+            Error = crossEntropyLoss
+        };
+    }
+
 
 
 }

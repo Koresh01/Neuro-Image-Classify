@@ -180,6 +180,9 @@ public class DatasetValidator : MonoBehaviour
         bool isBalanced = trainCategories.All(c => c.count == expectedCount);
         verdict = "В обучающей выборке в каждой категории разное количество изображений. ";
 
+
+
+
         // Тестовая выборка:
         categories = Directory.GetDirectories(testPath);
         foreach (var category in categories)
@@ -268,6 +271,29 @@ public class DatasetValidator : MonoBehaviour
         verdict = text;
         StopAllCoroutines();
         OnReady?.Invoke();
+    }
+
+    /// <summary>
+    /// Получить индекс категории по её названию.
+    /// </summary>
+    public int GetCategoryIndexByName(string categoryName)
+    {
+        if (categoryNames == null) throw new ArgumentNullException(nameof(categoryNames));
+        int index = categoryNames.IndexOf(categoryName);
+        if (index == -1)
+            throw new ArgumentException($"Категория с именем \"{categoryName}\" не найдена.");
+        return index;
+    }
+
+    /// <summary>
+    /// Получить название категории по её индексу.
+    /// </summary>
+    public string GetCategoryNameByIndex(int index)
+    {
+        if (categoryNames == null) throw new ArgumentNullException(nameof(categoryNames));
+        if (index < 0 || index >= categoryNames.Count)
+            throw new ArgumentOutOfRangeException(nameof(index), $"Индекс {index} вне диапазона категорий.");
+        return categoryNames[index];
     }
 
     /// <summary>
