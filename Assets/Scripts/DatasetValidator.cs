@@ -241,8 +241,9 @@ public class DatasetValidator : MonoBehaviour
                         yield break;
                     }
 
-                    // Добавляем путь
-                    imageList.Add(new ImageData
+                    // Добавляем путь, перемешивая датасет.
+                    int randomIndex = UnityEngine.Random.Range(0, imageList.Count + 1);
+                    imageList.Insert(randomIndex, new ImageData
                     {
                         path = imgPath,
                         y = categoryIndex,

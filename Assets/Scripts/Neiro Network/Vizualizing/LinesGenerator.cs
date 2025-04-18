@@ -54,7 +54,7 @@ public class LinesGenerator : MonoBehaviour
                 Vector3 to = layerVisualizer.pixelPositions[indexOffset + prevCount + j];
 
                 float weight = (float)weightMatrix[i, j];
-                Color color = colorPicker.GetColor(weight);
+                Color color = colorPicker.GetActivatedColor(weight);
 
                 lines.Add(new LineData { from = from, to = to, color = color });
             }

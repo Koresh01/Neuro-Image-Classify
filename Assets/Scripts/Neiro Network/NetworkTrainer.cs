@@ -14,58 +14,25 @@ class NetworkTrainer : MonoBehaviour
     [Inject] Network network;
     [Inject] ImageProcessor imageProcessor; // Sinleton, т.к. он не наследуется от MonoBehaviour
 
-    private int currentImageIndex = 0;
-
-
-    [ContextMenu("Один шаг обучения")]
-    public async void Fit()
+    [ContextMenu("Полное обучение")]
+    public async void TrainAll()
     {
-        if (currentImageIndex >= datasetValidator.trainImagesPaths.Count)
+        foreach (ImageData imgData in datasetValidator.trainImagesPaths)
         {
-            Debug.LogWarning("Обучение завершено. Все изображения обработаны.");
-            return;
+            if (!Application.isPlaying) return; // достаточно лишь одной этой проверки, чтобы после завершения программы, всё остановилось? 
+
+
+            string path = imgData.path;
+            int y = imgData.y;
+
+            Matrix inputVector = imageProcessor.ConvertImageToInputMatrix(path, network.h[0].GetLength(1));
+            network.h[0] = inputVector;
+
+            PredictionResult res = await Task.Run(() => network.Fit(y));    // Ждём завершения
+
+            Debug.Log($"Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {res.PredictedCategoryIndex}");
+
+            networkVizualizer.Vizualize();
         }
-
-        // Получаем данные для изображения
-        ImageData imgData = datasetValidator.trainImagesPaths[currentImageIndex];
-        int trueLabel = imgData.y;
-        string path = imgData.path;
-
-        // Подготовка входных данных
-        int width = network.h[0].GetLength(1);
-        network.h[0] = imageProcessor.ConvertImageToInputMatrix(path, width);
-
-        // Асинхронное выполнение обучения нейросети
-        PredictionResult res = await Task.Run(() => network.Fit(trueLabel));
-
-        // Логирование результата
-        Debug.Log($"[{currentImageIndex + 1}/{datasetValidator.trainImagesPaths.Count}] " +
-                  $"Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {res.PredictedCategoryIndex}");
-
-        // Визуализация после обучения
-        networkVizualizer.Vizualize();
-
-        // Переход к следующему изображению
-        currentImageIndex++;
-    }
-
-    // [ContextMenu("Полное обучение")]
-    async void TrainAll()
-    {
-        currentImageIndex = 0;
-
-        while (currentImageIndex < datasetValidator.trainImagesPaths.Count)
-        {
-            // Дожидаемся завершения каждого шага обучения
-            await Task.Run(() => Fit());
-        }
-
-        Debug.Log("Полное обучение завершено.");
-    }
-
-    // Пока не используется
-    void TestNetwork()
-    {
-
     }
 }

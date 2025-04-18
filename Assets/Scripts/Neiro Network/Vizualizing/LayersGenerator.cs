@@ -98,7 +98,7 @@ public class LayersGenerator : MonoBehaviour
     private void AddPixel(Vector3 pos, float value)
     {
         pixelPositions.Add(pos);
-        pixelColors.Add(colorPicker.GetColor(value));
+        pixelColors.Add(colorPicker.GetActivatedColor(value));
     }
 
     private void OnRenderObject()

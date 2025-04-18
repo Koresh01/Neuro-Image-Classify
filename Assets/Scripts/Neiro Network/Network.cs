@@ -52,14 +52,14 @@ public class Network : MonoBehaviour
 
     [Header("Предположение нейросети:")]
     /// <summary>
+    /// Вектор предположения сети. Нормализованный.
+    /// </summary>
+    public Matrix z;
+
+    /// <summary>
     /// Истиный индекс категории изображения.
     /// </summary>
     int y;
-
-    /// <summary>
-    /// Вектор предположения сети. Нормализованный.
-    /// </summary>
-    Matrix z;
 
     void OnEnable()
     {
@@ -212,8 +212,8 @@ public class Network : MonoBehaviour
     /// <param name="layer">Индекс слоя, к которому применяется обновление.</param>
     void ApplyGradientStep(Matrix dE_dW, Matrix dE_dB, int layer)
     {
-        W[layer] -= 0.001 * dE_dW;
-        B[layer] -= 0.001 * dE_dB;
+        W[layer] -= 0.1 * dE_dW;
+        B[layer] -= 0.1 * dE_dB;
     }
     #endregion
 
@@ -233,12 +233,7 @@ public class Network : MonoBehaviour
         }
         Matrix lastLayer = t[t.Count - 1];  // последний слой, к которому не применялась функция активации.
         z = SoftMax(lastLayer);
-
-        // Вычисление ошибки:
-        // Double Error = CrossEntropy(z, y);
     }
-
-    
     void BackPropogation()
     {
         // One hot encoding
@@ -272,32 +267,29 @@ public class Network : MonoBehaviour
     /// <summary>
     /// Выполняет один шаг обучения на одном примере и возвращает результат.
     /// </summary>
-    /// <param name="trueLabelIndex">Индекс истинной категории (ground truth).</param>
+    /// <param name="y">Индекс истинной категории (ground truth).</param>
     /// <returns>Результат предсказания нейросети.</returns>
-    public PredictionResult Fit(int trueLabelIndex)
+    public PredictionResult Fit(int y)
     {
         // Устанавливаем правильный индекс категории для текущего изображения
-        this.y = trueLabelIndex;
+        this.y = y;
 
         // Прямой и обратный проходы
         ForwardPropogation();
         BackPropogation();
 
         // Индекс категории, предсказанный нейросетью
-        int predictedLabelIndex = Numpy.argmax(z);
+        int predicted_Y = Numpy.argmax(z);
 
         // Значение функции потерь (Cross-Entropy)
-        float crossEntropyLoss = (float)CrossEntropy(z, trueLabelIndex);
-
-        // Название предсказанной категории
-        // string predictedCategoryName = datasetValidator.GetCategoryNameByIndex(predictedLabelIndex);
+        float Error = (float)CrossEntropy(z, y);
 
         // Возвращаем результат обучения
         return new PredictionResult
         {
-            TrueLabelIndex = trueLabelIndex,
-            PredictedCategoryIndex = predictedLabelIndex,
-            Error = crossEntropyLoss
+            TrueLabelIndex = y,
+            PredictedCategoryIndex = predicted_Y,
+            Error = Error
         };
     }
 
