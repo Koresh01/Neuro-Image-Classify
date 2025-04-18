@@ -8,6 +8,7 @@ using Zenject;
 /// <summary>
 /// Результат предсказания нейросети после одного шага обучения.
 /// </summary>
+[Serializable]
 public class PredictionResult
 {
     /// <summary>
@@ -51,11 +52,12 @@ public class Network : MonoBehaviour
     public List<Matrix> B;
 
     [Header("Предположение нейросети:")]
+    [SerializeField] PredictionResult predict;
+
     /// <summary>
     /// Вектор предположения сети. Нормализованный.
     /// </summary>
-    public Matrix z;
-
+    Matrix z;
     /// <summary>
     /// Истиный индекс категории изображения.
     /// </summary>
@@ -212,8 +214,8 @@ public class Network : MonoBehaviour
     /// <param name="layer">Индекс слоя, к которому применяется обновление.</param>
     void ApplyGradientStep(Matrix dE_dW, Matrix dE_dB, int layer)
     {
-        W[layer] -= 0.1 * dE_dW;
-        B[layer] -= 0.1 * dE_dB;
+        W[layer] -= 0.001 * dE_dW;
+        B[layer] -= 0.001 * dE_dB;
     }
     #endregion
 
@@ -285,12 +287,14 @@ public class Network : MonoBehaviour
         float Error = (float)CrossEntropy(z, y);
 
         // Возвращаем результат обучения
-        return new PredictionResult
+        predict = new PredictionResult
         {
             TrueLabelIndex = y,
             PredictedCategoryIndex = predicted_Y,
             Error = Error
         };
+
+        return predict;
     }
 
 

@@ -1,23 +1,40 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class GradientColorPicker : MonoBehaviour
 {
-    [Header("Градиент от 0 до 1")]
+    [Header("Р“СЂР°РґРёРµРЅС‚ РѕС‚ 0 РґРѕ 1")]
     [SerializeField]
     private Gradient activatedGradient;
 
-    [Header("Градиент от 0 до maxValue")]   // максимальное значение в матрицах весов
+    [Header("Р“СЂР°РґРёРµРЅС‚ РѕС‚ -maxAbsValue РґРѕ +maxAbsValue")]
     [SerializeField]
     private Gradient nonActivatedGradient;
 
+    [Tooltip("РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ Р°Р±СЃРѕР»СЋС‚РЅРѕРµ Р·РЅР°С‡РµРЅРёРµ РІРµСЃРѕРІ (РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РЅРѕСЂРјР°Р»РёР·Р°С†РёРё РѕС‚ -n РґРѕ +n)")]
+    [SerializeField]
+    private float maxAbsValue = 1f;
+
     /// <summary>
-    /// Получить цвет АКТИВИРОВАННОГО НЕЙРОНА, чей вес от 0 до 1.
+    /// РџРѕР»СѓС‡РёС‚СЊ С†РІРµС‚ РђРљРўРР’РР РћР’РђРќРќРћР“Рћ РќР•Р™Р РћРќРђ, С‡РµР№ РІРµСЃ РѕС‚ 0 РґРѕ 1.
     /// </summary>
-    /// <param name="normalizedValue">Значение от 0 до 1.</param>
+    /// <param name="normalizedValue">Р—РЅР°С‡РµРЅРёРµ РѕС‚ 0 РґРѕ 1.</param>
     public Color GetActivatedColor(float normalizedValue)
     {
-        // Защита от выхода за границы
         normalizedValue = Mathf.Clamp01(normalizedValue);
         return activatedGradient.Evaluate(normalizedValue);
+    }
+
+    /// <summary>
+    /// РџРѕР»СѓС‡РёС‚СЊ С†РІРµС‚ РќР•РђРљРўРР’РР РћР’РђРќРќРћР“Рћ РќР•Р™Р РћРќРђ, С‡РµР№ РІРµСЃ РѕС‚ -maxAbsValue РґРѕ +maxAbsValue.
+    /// </summary>
+    /// <param name="value">Р—РЅР°С‡РµРЅРёРµ РѕС‚ -maxAbsValue РґРѕ +maxAbsValue.</param>
+    public Color GetNonActivatedColor(float value)
+    {
+        // РћРіСЂР°РЅРёС‡РёРј Р·РЅР°С‡РµРЅРёРµ
+        value = Mathf.Clamp(value, -maxAbsValue, maxAbsValue);
+
+        // РџСЂРµРѕР±СЂР°Р·СѓРµРј [-maxAbsValue, maxAbsValue] -> [0, 1]
+        float t = (value + maxAbsValue) / (2f * maxAbsValue);
+        return nonActivatedGradient.Evaluate(t);
     }
 }

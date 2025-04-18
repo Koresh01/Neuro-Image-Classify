@@ -17,6 +17,7 @@ class NetworkTrainer : MonoBehaviour
     [ContextMenu("Полное обучение")]
     public async void TrainAll()
     {
+        int count = 0;
         foreach (ImageData imgData in datasetValidator.trainImagesPaths)
         {
             if (!Application.isPlaying) return; // достаточно лишь одной этой проверки, чтобы после завершения программы, всё остановилось? 
@@ -30,7 +31,7 @@ class NetworkTrainer : MonoBehaviour
 
             PredictionResult res = await Task.Run(() => network.Fit(y));    // Ждём завершения
 
-            Debug.Log($"Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {res.PredictedCategoryIndex}");
+            Debug.Log($"[{count++}/{datasetValidator.trainImagesPaths.Count}] Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {res.PredictedCategoryIndex}");
 
             networkVizualizer.Vizualize();
         }
