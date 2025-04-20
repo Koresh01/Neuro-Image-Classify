@@ -30,10 +30,9 @@ class NetworkTrainer : MonoBehaviour
             network.h[0] = inputVector;
 
             PredictionResult res = await Task.Run(() => network.Fit(y));    // Ждём завершения
+            networkVizualizer.Vizualize();
 
             Debug.Log($"[{count++}/{datasetValidator.trainImagesPaths.Count}] Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {res.PredictedCategoryIndex}");
-
-            networkVizualizer.Vizualize();
         }
     }
 }

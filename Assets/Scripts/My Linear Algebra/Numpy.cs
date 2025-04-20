@@ -12,7 +12,7 @@ public static class Numpy
     {
         // Flattened argmax
         int maxIndex = 0;
-        double maxValue = data[0, 0];
+        float maxValue = data[0, 0];
 
         int rows = data.GetLength(0);
         int cols = data.GetLength(1);
@@ -34,7 +34,7 @@ public static class Numpy
     /// </summary>
     public static Matrix Zeros(int rows, int cols)
     {
-        double[,] data = new double[rows, cols]; // все значения уже 0
+        float[,] data = new float[rows, cols]; // все значения уже 0
         return new Matrix(data);
     }
 
@@ -43,10 +43,10 @@ public static class Numpy
     /// </summary>
     public static Matrix Ones(int rows, int cols)
     {
-        double[,] data = new double[rows, cols];
+        float[,] data = new float[rows, cols];
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
-                data[i, j] = 1.0;
+                data[i, j] = 1.0f;
 
         return new Matrix(data);
     }
@@ -60,11 +60,11 @@ public static class Numpy
     {
         int rows = data.GetLength(0);
         int cols = data.GetLength(1);
-        double[,] result = new double[rows, cols];
+        float[,] result = new float[rows, cols];
 
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
-                result[i, j] = Math.Exp(data[i, j]);
+                result[i, j] = MathF.Exp(data[i, j]);
 
         return new Matrix(result);
     }
@@ -77,11 +77,11 @@ public static class Numpy
     {
         int rows = data.GetLength(0);
         int cols = data.GetLength(1);
-        double[,] result = new double[rows, cols];
+        float[,] result = new float[rows, cols];
 
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
-                result[i, j] = Math.Log(data[i, j]);
+                result[i, j] = MathF.Log(data[i, j]);
 
         return new Matrix(result);
     }
@@ -89,12 +89,12 @@ public static class Numpy
     /// <summary>
     /// Возвращает сумму всех элементов в матрице.
     /// </summary>
-    /// <returns>Double значение суммы всех элементов</returns>
-    public static double Sum(Matrix data)
+    /// <returns>float значение суммы всех элементов</returns>
+    public static float Sum(Matrix data)
     {
         int rows = data.GetLength(0);
         int cols = data.GetLength(1);
-        double sum = 0.0;
+        float sum = 0.0f;
 
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
@@ -104,24 +104,38 @@ public static class Numpy
     }
 
     /// <summary>
-    /// Возвращает новую матрицу, в которой каждый элемент равен максимуму между исходным значением и порогом.
+    /// Возвращает минимальное значение в матрице (как в numpy.min).
     /// </summary>
-    /// <param name="data">Исходная матрица</param>
-    /// <param name="threshold">Пороговое значение</param>
-    /// <returns>Новая матрица после применения функции maximum</returns>
-    public static Matrix Maximum(Matrix data, double threshold)
+    public static float Min(Matrix data)
     {
         int rows = data.GetLength(0);
         int cols = data.GetLength(1);
-        double[,] result = new double[rows, cols];
 
+        float minValue = data[0, 0];
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
-                result[i, j] = Math.Max(data[i, j], threshold);
+                if (data[i, j] < minValue)
+                    minValue = data[i, j];
 
-        return new Matrix(result);
+        return minValue;
     }
 
+    /// <summary>
+    /// Возвращает максимальное значение в матрице (как в numpy.max).
+    /// </summary>
+    public static float Max(Matrix data)
+    {
+        int rows = data.GetLength(0);
+        int cols = data.GetLength(1);
+
+        float maxValue = data[0, 0];
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                if (data[i, j] > maxValue)
+                    maxValue = data[i, j];
+
+        return maxValue;
+    }
 
     public static class Random
     {
@@ -132,7 +146,7 @@ public static class Numpy
         /// </summary>
         public static Matrix Randn(int rows, int cols)
         {
-            double[,] data = new double[rows, cols];
+            float[,] data = new float[rows, cols];
             for (int i = 0; i < rows; i++)
                 for (int j = 0; j < cols; j++)
                     data[i, j] = Gaussian();
@@ -140,11 +154,11 @@ public static class Numpy
             return new Matrix(data);
 
             // Гаусово распределение.
-            double Gaussian()
+            float Gaussian()
             {
-                double u1 = 1.0 - rand.NextDouble();
-                double u2 = 1.0 - rand.NextDouble();
-                return Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2);
+                float u1 = 1.0f - (float) rand.NextDouble();
+                float u2 = 1.0f - (float) rand.NextDouble();
+                return MathF.Sqrt(-2.0f * MathF.Log(u1)) * MathF.Cos(2.0f * MathF.PI * u2);
             }
         }
     }

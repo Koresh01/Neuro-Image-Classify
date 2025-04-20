@@ -8,7 +8,7 @@ using UnityEngine;
 [Serializable]
 public class Matrix
 {
-    double[,] data;
+    float[,] data;
 
     [Tooltip("Кол-во строк")]
     [SerializeField] private int rows;
@@ -17,7 +17,7 @@ public class Matrix
     [SerializeField] private int columns;
 
     // Конструктор для создания матрицы
-    public Matrix(double[,] initialData)
+    public Matrix(float[,] initialData)
     {
         data = initialData;
         rows = initialData.GetLength(0);
@@ -26,7 +26,7 @@ public class Matrix
     #region OPERATORS
     public static Matrix operator -(Matrix a)
     {
-        double[,] result = new double[a.rows, a.columns];
+        float[,] result = new float[a.rows, a.columns];
         for (int i = 0; i < a.rows; i++)
             for (int j = 0; j < a.columns; j++)
                 result[i, j] = -a.data[i, j];
@@ -38,25 +38,25 @@ public class Matrix
         if (a.rows != b.rows || a.columns != b.columns)
             throw new ArgumentException("Matrix dimensions must agree.");
 
-        double[,] result = new double[a.rows, a.columns];
+        float[,] result = new float[a.rows, a.columns];
         for (int i = 0; i < a.rows; i++)
             for (int j = 0; j < a.columns; j++)
                 result[i, j] = a.data[i, j] - b.data[i, j];
 
         return new Matrix(result);
     }
-    public static Matrix operator -(Matrix a, double b)
+    public static Matrix operator -(Matrix a, float b)
     {
-        double[,] result = new double[a.rows, a.columns];
+        float[,] result = new float[a.rows, a.columns];
         for (int i = 0; i < a.rows; i++)
             for (int j = 0; j < a.columns; j++)
                 result[i, j] = a.data[i, j] - b;
 
         return new Matrix(result);
     }
-    public static Matrix operator -(double a, Matrix b)
+    public static Matrix operator -(float a, Matrix b)
     {
-        double[,] result = new double[b.rows, b.columns];
+        float[,] result = new float[b.rows, b.columns];
         for (int i = 0; i < b.rows; i++)
             for (int j = 0; j < b.columns; j++)
                 result[i, j] = a - b.data[i, j];
@@ -64,16 +64,16 @@ public class Matrix
         return new Matrix(result);
     }
 
-    public static Matrix operator +(Matrix a, double b)
+    public static Matrix operator +(Matrix a, float b)
     {
-        double[,] result = new double[a.rows, a.columns];
+        float[,] result = new float[a.rows, a.columns];
         for (int i = 0; i < a.rows; i++)
             for (int j = 0; j < a.columns; j++)
                 result[i, j] = a.data[i, j] + b;
 
         return new Matrix(result);
     }
-    public static Matrix operator +(double a, Matrix b)
+    public static Matrix operator +(float a, Matrix b)
     {
         return b + a; // используем предыдущую перегрузку
     }
@@ -82,7 +82,7 @@ public class Matrix
         if (a.rows != b.rows || a.columns != b.columns)
             throw new ArgumentException("Matrix dimensions must agree.");
 
-        double[,] result = new double[a.rows, a.columns];
+        float[,] result = new float[a.rows, a.columns];
         for (int i = 0; i < a.rows; i++)
         {
             for (int j = 0; j < a.columns; j++)
@@ -101,7 +101,7 @@ public class Matrix
         if (a.columns != b.rows)
             throw new ArgumentException("Invalid matrix multiplication dimensions");
 
-        double[,] result = new double[a.rows, b.columns];
+        float[,] result = new float[a.rows, b.columns];
         for (int i = 0; i < a.rows; i++)
         {
             for (int j = 0; j < b.columns; j++)
@@ -122,7 +122,7 @@ public class Matrix
         if (a.rows != b.rows || a.columns != b.columns)
             throw new ArgumentException("Matrix dimensions must agree.");
 
-        double[,] result = new double[a.rows, a.columns];
+        float[,] result = new float[a.rows, a.columns];
         for (int i = 0; i < a.rows; i++)
         {
             for (int j = 0; j < a.columns; j++)
@@ -132,9 +132,9 @@ public class Matrix
         }
         return new Matrix(result);
     }
-    public static Matrix operator *(double a, Matrix b)
+    public static Matrix operator *(float a, Matrix b)
     {
-        double[,] result = new double[b.rows, b.columns];
+        float[,] result = new float[b.rows, b.columns];
         for (int i = 0; i < b.rows; i++)
             for (int j = 0; j < b.columns; j++)
                 result[i, j] = a * b.data[i, j];
@@ -142,18 +142,18 @@ public class Matrix
         return new Matrix(result);
     }
 
-    public static Matrix operator /(Matrix a, double b)
+    public static Matrix operator /(Matrix a, float b)
     {
-        double[,] result = new double[a.rows, a.columns];
+        float[,] result = new float[a.rows, a.columns];
         for (int i = 0; i < a.rows; i++)
             for (int j = 0; j < a.columns; j++)
                 result[i, j] = a.data[i, j] / b;
 
         return new Matrix(result);
     }
-    public static Matrix operator /(double b, Matrix a)
+    public static Matrix operator /(float b, Matrix a)
     {
-        double[,] result = new double[a.rows, a.columns];
+        float[,] result = new float[a.rows, a.columns];
         for (int i = 0; i < a.rows; i++)
             for (int j = 0; j < a.columns; j++)
                 result[i, j] = b / a.data[i, j];
@@ -162,7 +162,7 @@ public class Matrix
     }
 
 
-    public double this[int i, int j]
+    public float this[int i, int j]
     {
         get => data[i, j];
         set => data[i, j] = value;
@@ -172,7 +172,7 @@ public class Matrix
     // Метод для транспонирования матрицы
     public Matrix T()
     {
-        double[,] result = new double[columns, rows];
+        float[,] result = new float[columns, rows];
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)

@@ -2839,11 +2839,9 @@ MonoBehaviour:
   - rows: 0
     columns: 0
   - rows: 1
-    columns: 2500
+    columns: 4900
   - rows: 1
-    columns: 2500
-  - rows: 1
-    columns: 2500
+    columns: 9
   - rows: 0
     columns: 0
   h: []
@@ -2900,7 +2898,7 @@ MonoBehaviour:
   activatedGradient:
     serializedVersion: 2
     key0: {r: 1, g: 1, b: 1, a: 1}
-    key1: {r: 0.80574083, g: 0, b: 1, a: 1}
+    key1: {r: 0, g: 0, b: 0, a: 1}
     key2: {r: 0, g: 0, b: 0, a: 0}
     key3: {r: 0, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}
@@ -2929,8 +2927,8 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   nonActivatedGradient:
     serializedVersion: 2
-    key0: {r: 0, g: 0, b: 0, a: 1}
-    key1: {r: 1, g: 0.91147983, b: 0, a: 1}
+    key0: {r: 0, g: 0.61144805, b: 1, a: 1}
+    key1: {r: 1, g: 0, b: 0.1030879, a: 1}
     key2: {r: 0, g: 0, b: 0, a: 0}
     key3: {r: 0, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}
@@ -2957,7 +2955,7 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
-  maxAbsValue: 2
+  maxAbsValue: 1
 --- !u!1 &1717693160
 GameObject:
   m_ObjectHideFlags: 0

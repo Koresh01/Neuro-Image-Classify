@@ -30,11 +30,15 @@ public class GradientColorPicker : MonoBehaviour
     /// <param name="value">Значение от -maxAbsValue до +maxAbsValue.</param>
     public Color GetNonActivatedColor(float value)
     {
-        // Ограничим значение
-        value = Mathf.Clamp(value, -maxAbsValue, maxAbsValue);
+        value = Mathf.Abs(value);
 
-        // Преобразуем [-maxAbsValue, maxAbsValue] -> [0, 1]
-        float t = (value + maxAbsValue) / (2f * maxAbsValue);
-        return nonActivatedGradient.Evaluate(t);
+        float normalizedValue = 0;
+        if (value > maxAbsValue)
+            value = 1;
+        else if (value < 0)
+            normalizedValue = 0;
+        else
+            normalizedValue = value / maxAbsValue;
+        return nonActivatedGradient.Evaluate(normalizedValue);
     }
 }

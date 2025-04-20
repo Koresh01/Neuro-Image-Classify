@@ -160,7 +160,7 @@ public class Network : MonoBehaviour
     #endregion
 
     #region ДОПФУНКЦИИ
-    Matrix Sigmoid(Matrix t)
+    public Matrix Sigmoid(Matrix t)
     {
         Matrix res = 1 / (1 + (Numpy.Exp(-t)));
         return res;
@@ -180,7 +180,7 @@ public class Network : MonoBehaviour
     /// <returns>Вектор вероятности отношения изображения к определённой категории.</returns>
     Matrix SoftMax(Matrix t)
     {
-        Matrix exp = Numpy.Exp(t);  // Marix недопустим в этом контексте, и = недопустимый термин в выражении
+        Matrix exp = Numpy.Exp(t);
         return exp / Numpy.Sum(exp);
     }
 
@@ -188,10 +188,10 @@ public class Network : MonoBehaviour
     /// Вычисляет величину обшибки.
     /// <param name="z">Вектор вероятностей</param>
     /// <param name="y">Индекс правильной категории</param>
-    /// <returns>Double значение величины ошибки.</returns>
-    Double CrossEntropy(Matrix z, int y)    // это разреженная крос-энтропия, т.к. здесь y - это индекс, а не вектор.
+    /// <returns>float значение величины ошибки.</returns>
+    float CrossEntropy(Matrix z, int y)    // это разреженная крос-энтропия, т.к. здесь y - это индекс, а не вектор.
     {
-        return -Math.Log((z[0, y]));
+        return -MathF.Log((z[0, y]));
     }
 
     /// <summary>
@@ -214,8 +214,8 @@ public class Network : MonoBehaviour
     /// <param name="layer">Индекс слоя, к которому применяется обновление.</param>
     void ApplyGradientStep(Matrix dE_dW, Matrix dE_dB, int layer)
     {
-        W[layer] -= 0.001 * dE_dW;
-        B[layer] -= 0.001 * dE_dB;
+        W[layer] -= (0.2f * dE_dW);
+        B[layer] -= (0.2f * dE_dB);
     }
     #endregion
 
@@ -232,6 +232,7 @@ public class Network : MonoBehaviour
         {
             t[i+1] = (h[i] ^ W[i]) + B[i];    // Осторожно, h[0] должен быть таким же как t[0], это входной слой.
             h[i+1] = Sigmoid(t[i + 1]);
+            // UnityEngine.Debug.Log($"t[{i+1}] \t max: {Numpy.Max(t[i+1])} \t min: {Numpy.Min(t[i+1])} \t h[{i + 1}] \t max: {Numpy.Max(h[i + 1])} \t min: {Numpy.Min(h[i + 1])}");
         }
         Matrix lastLayer = t[t.Count - 1];  // последний слой, к которому не применялась функция активации.
         z = SoftMax(lastLayer);
@@ -278,13 +279,16 @@ public class Network : MonoBehaviour
 
         // Прямой и обратный проходы
         ForwardPropogation();
+
+        // Значение функции потерь (Cross-Entropy)
+        float Error = CrossEntropy(z, y);
+
         BackPropogation();
 
         // Индекс категории, предсказанный нейросетью
         int predicted_Y = Numpy.argmax(z);
 
-        // Значение функции потерь (Cross-Entropy)
-        float Error = (float)CrossEntropy(z, y);
+        
 
         // Возвращаем результат обучения
         predict = new PredictionResult

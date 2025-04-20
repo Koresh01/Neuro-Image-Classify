@@ -6,7 +6,6 @@ using Zenject;
 public class LinesGenerator : MonoBehaviour
 {
     [Inject] GradientColorPicker colorPicker;
-    [Inject] DatasetValidator datasetValidator;
     [Inject] LayersGenerator layerVisualizer;
 
     [Header("Материал для линий")]
