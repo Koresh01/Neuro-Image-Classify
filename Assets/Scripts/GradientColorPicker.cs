@@ -2,43 +2,30 @@
 
 public class GradientColorPicker : MonoBehaviour
 {
-    [Header("Градиент от 0 до 1")]
-    [SerializeField]
-    private Gradient activatedGradient;
+    [Header("Градиент от 0 до 1 (для активации нейрона)")]
+    [SerializeField] private Gradient activatedGradient;
 
-    [Header("Градиент от -maxAbsValue до +maxAbsValue")]
-    [SerializeField]
-    private Gradient nonActivatedGradient;
+    [Header("Градиент от -delta до +delta")]
+    [Tooltip("Максимально ожидаемое изменение веса")]
+    [SerializeField] private float maxAllowedDelta = 0.001f;
 
-    [Tooltip("Максимальное абсолютное значение весов (используется для нормализации от -n до +n)")]
-    [SerializeField]
-    private float maxAbsValue = 1f;
+    [SerializeField] private Gradient deltaGradient;
 
     /// <summary>
-    /// Получить цвет АКТИВИРОВАННОГО НЕЙРОНА, чей вес от 0 до 1.
+    /// Получить цвет АКТИВИРОВАННОГО НЕЙРОНА.
     /// </summary>
-    /// <param name="normalizedValue">Значение от 0 до 1.</param>
     public Color GetActivatedColor(float normalizedValue)
     {
-        normalizedValue = Mathf.Clamp01(normalizedValue);
-        return activatedGradient.Evaluate(normalizedValue);
+        return activatedGradient.Evaluate(Mathf.Clamp01(normalizedValue));
     }
 
     /// <summary>
-    /// Получить цвет НЕАКТИВИРОВАННОГО НЕЙРОНА, чей вес от -maxAbsValue до +maxAbsValue.
+    /// Получить цвет по дельте изменения веса.
     /// </summary>
-    /// <param name="value">Значение от -maxAbsValue до +maxAbsValue.</param>
-    public Color GetNonActivatedColor(float value)
+    public Color GetDeltaColor(float delta)
     {
-        value = Mathf.Abs(value);
-
-        float normalizedValue = 0;
-        if (value > maxAbsValue)
-            value = 1;
-        else if (value < 0)
-            normalizedValue = 0;
-        else
-            normalizedValue = value / maxAbsValue;
-        return nonActivatedGradient.Evaluate(normalizedValue);
+        // Приводим дельту к диапазону [-maxAllowedDelta, +maxAllowedDelta] → [0, 1]
+        float normalized = Mathf.InverseLerp(-maxAllowedDelta, maxAllowedDelta, delta);
+        return deltaGradient.Evaluate(normalized);
     }
 }

@@ -214,8 +214,8 @@ public class Network : MonoBehaviour
     /// <param name="layer">Индекс слоя, к которому применяется обновление.</param>
     void ApplyGradientStep(Matrix dE_dW, Matrix dE_dB, int layer)
     {
-        W[layer] -= (0.2f * dE_dW);
-        B[layer] -= (0.2f * dE_dB);
+        W[layer] -= (0.001f * dE_dW);
+        B[layer] -= (0.001f * dE_dB);   
     }
     #endregion
 

@@ -15,7 +15,10 @@ public class LinesGenerator : MonoBehaviour
     [Range(0, 10000)]
     [SerializeField] int maxConnectionsPerLayer = 50;
 
+
+    // Линии и их цвет по изменению веса
     private List<LineData> lines = new();
+    private Dictionary<(int layer, int from, int to), float> previousWeights = new();
 
     /// <summary>
     /// Детеминированный генератор — фиксированное поведение
@@ -29,10 +32,11 @@ public class LinesGenerator : MonoBehaviour
         public Color color;
     }
 
+
     public void DrawLines(List<Matrix> weights)
     {
         lines.Clear();
-        rand = new System.Random(12345);    // чтоб трогать одни и те же линии
+        rand = new System.Random(12345); // стабильно трогаем одни и те же связи
 
         int indexOffset = 0;
 
@@ -52,15 +56,24 @@ public class LinesGenerator : MonoBehaviour
                 Vector3 from = layerVisualizer.pixelPositions[indexOffset + i];
                 Vector3 to = layerVisualizer.pixelPositions[indexOffset + prevCount + j];
 
+                // реакция цвета линии по изменению веса линии
                 float weight = (float)weightMatrix[i, j];
-                Color color = colorPicker.GetNonActivatedColor(weight);
+                var key = (layer, i, j);
+
+                float previousWeight = previousWeights.ContainsKey(key) ? previousWeights[key] : weight;
+                float delta = weight - previousWeight;
+
+                Color color = colorPicker.GetDeltaColor(delta);
+                
 
                 lines.Add(new LineData { from = from, to = to, color = color });
+                previousWeights[key] = weight;
             }
 
             indexOffset += prevCount;
         }
     }
+
 
     private void OnRenderObject()
     {
