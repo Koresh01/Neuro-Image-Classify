@@ -141,6 +141,15 @@ public class Matrix
 
         return new Matrix(result);
     }
+    public static Matrix operator *(Matrix a, float b)
+    {
+        float[,] result = new float[a.rows, a.columns];
+        for (int i = 0; i < a.rows; i++)
+            for (int j = 0; j < a.columns; j++)
+                result[i, j] = a.data[i, j] * b;
+
+        return new Matrix(result);
+    }
 
     public static Matrix operator /(Matrix a, float b)
     {

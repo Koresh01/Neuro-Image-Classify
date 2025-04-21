@@ -3739,12 +3739,13 @@ MonoBehaviour:
   - rows: 0
     columns: 0
   - rows: 1
-    columns: 256
+    columns: 2500
   - rows: 0
     columns: 0
   h: []
   W: []
   B: []
+  learningRate: 0.0001
   predict:
     TrueLabelIndex: 0
     PredictedCategoryIndex: 0

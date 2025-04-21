@@ -51,6 +51,8 @@ public class Network : MonoBehaviour
     [Header("Нелинейности:")]
     public List<Matrix> B;
 
+    [SerializeField, Range(0.0001f, 0.3f)] float learningRate = 0.0001f;
+
     [Header("Предположение нейросети:")]
     [SerializeField] PredictionResult predict;
 
@@ -139,7 +141,15 @@ public class Network : MonoBehaviour
             int curColumns = t[i].GetLength(1);
             int nextColumns = t[i+1].GetLength(1);
 
-            Matrix w = Numpy.Random.Randn(curColumns, nextColumns);
+            
+            // Xavier ------------ защита от взрыва весов.
+            float scale = Mathf.Sqrt(1f / curColumns);
+            // Или He
+            // float scale = Mathf.Sqrt(2f / curColumns);
+            Matrix w = Numpy.Random.Randn(curColumns, nextColumns) * scale;
+            // ------------------------------------------
+            
+
             W.Add(w);
         }
     }
@@ -180,7 +190,8 @@ public class Network : MonoBehaviour
     /// <returns>Вектор вероятности отношения изображения к определённой категории.</returns>
     Matrix SoftMax(Matrix t)
     {
-        Matrix exp = Numpy.Exp(t);
+        Matrix stabilized = t - Numpy.Max(t); // Broadcasting max value, защита от переполнений.
+        Matrix exp = Numpy.Exp(stabilized);
         return exp / Numpy.Sum(exp);
     }
 
@@ -214,8 +225,8 @@ public class Network : MonoBehaviour
     /// <param name="layer">Индекс слоя, к которому применяется обновление.</param>
     void ApplyGradientStep(Matrix dE_dW, Matrix dE_dB, int layer)
     {
-        W[layer] -= (0.001f * dE_dW);
-        B[layer] -= (0.001f * dE_dB);   
+        W[layer] -= (learningRate * dE_dW);
+        B[layer] -= (learningRate * dE_dB);   
     }
     #endregion
 
