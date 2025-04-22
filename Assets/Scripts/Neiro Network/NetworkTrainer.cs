@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
@@ -14,25 +16,57 @@ class NetworkTrainer : MonoBehaviour
     [Inject] Network network;
     [Inject] ImageProcessor imageProcessor; // Sinleton, т.к. он не наследуется от MonoBehaviour
 
-    [ContextMenu("Полное обучение")]
+    private CancellationTokenSource cancellationTokenSource;
+
+    private void Awake()
+    {
+        cancellationTokenSource = new CancellationTokenSource();
+    }
+
+    [ContextMenu("Полное обучение.")]
     public async void TrainAll()
     {
+        // При каждом запуске создаём новый источник
+        cancellationTokenSource?.Cancel();
+        cancellationTokenSource?.Dispose();
+        cancellationTokenSource = new CancellationTokenSource();
+        CancellationToken token = cancellationTokenSource.Token;
+
         int count = 0;
-        foreach (ImageData imgData in datasetValidator.trainImagesPaths)
+        try
         {
-            if (!Application.isPlaying) return; // достаточно лишь одной этой проверки, чтобы после завершения программы, всё остановилось? 
+            foreach (ImageData imgData in datasetValidator.trainImagesPaths)
+            {
+                if (!Application.isPlaying) return;
+                token.ThrowIfCancellationRequested();   // проверка на остановку обучения
+
+                string path = imgData.path;
+                int y = imgData.y;
+
+                Matrix inputVector = imageProcessor.ConvertImageToInputMatrix(path, network.h[0].GetLength(1));
+                network.h[0] = inputVector;
+
+                PredictionResult res = await Task.Run(() => network.Fit(y), token); // передаём token в Task.Run
+                networkVizualizer.Vizualize();
+
+                Debug.Log($"[{count++}/{datasetValidator.trainImagesPaths.Count}] Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {res.PredictedCategoryIndex}");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.Log("Асинхронная операция отменена.");
+        }
+    }
 
 
-            string path = imgData.path;
-            int y = imgData.y;
-
-            Matrix inputVector = imageProcessor.ConvertImageToInputMatrix(path, network.h[0].GetLength(1));
-            network.h[0] = inputVector;
-
-            PredictionResult res = await Task.Run(() => network.Fit(y));    // Ждём завершения
-            networkVizualizer.Vizualize();
-
-            Debug.Log($"[{count++}/{datasetValidator.trainImagesPaths.Count}] Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {res.PredictedCategoryIndex}");
+    [ContextMenu("Прекратить обучение.")]
+    public void StopTraining()
+    {
+        if (cancellationTokenSource != null)
+        {
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose();
+            cancellationTokenSource = null;
         }
     }
 }
