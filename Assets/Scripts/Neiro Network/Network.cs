@@ -141,14 +141,9 @@ public class Network : MonoBehaviour
             int curColumns = t[i].GetLength(1);
             int nextColumns = t[i+1].GetLength(1);
 
-            
-            // Xavier ------------ защита от взрыва весов.
-            float scale = Mathf.Sqrt(1f / curColumns);
-            // Или He
-            // float scale = Mathf.Sqrt(2f / curColumns);
-            Matrix w = Numpy.Random.Randn(curColumns, nextColumns) * scale;
-            // ------------------------------------------
-            
+
+            Matrix w = Numpy.Random.Randn(curColumns, nextColumns);
+
 
             W.Add(w);
         }
@@ -190,8 +185,7 @@ public class Network : MonoBehaviour
     /// <returns>Вектор вероятности отношения изображения к определённой категории.</returns>
     Matrix SoftMax(Matrix t)
     {
-        Matrix stabilized = t - Numpy.Max(t); // Broadcasting max value, защита от переполнений.
-        Matrix exp = Numpy.Exp(stabilized);
+        Matrix exp = Numpy.Exp(t);
         return exp / Numpy.Sum(exp);
     }
 
