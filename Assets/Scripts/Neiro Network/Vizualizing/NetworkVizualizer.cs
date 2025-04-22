@@ -16,17 +16,6 @@ public class NetworkVizualizer : MonoBehaviour
     [Tooltip("Нейронная сеть со всеми слоями/весами...")]
     [Inject] Network network;
 
-
-    private void OnEnable()
-    {
-        network.onReady += Vizualize;
-    }
-
-    private void OnDisable()
-    {
-        network.onReady -= Vizualize;
-    }
-
     [ContextMenu("Переотрисовать нейронку.")]
     public void Vizualize()
     {

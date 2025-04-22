@@ -26,6 +26,17 @@ class NetworkTrainer : MonoBehaviour
     [ContextMenu("Полное обучение.")]
     public async void TrainAll()
     {
+        if (!datasetValidator.isValid) {
+            Debug.LogWarning("Сначала валидируйте датасет");
+            return;
+        }
+
+        if (!network.isReady)
+        {
+            Debug.LogWarning("Сначала укажите число слоёв и нейронов.");
+            return;
+        }
+
         // При каждом запуске создаём новый источник
         cancellationTokenSource?.Cancel();
         cancellationTokenSource?.Dispose();

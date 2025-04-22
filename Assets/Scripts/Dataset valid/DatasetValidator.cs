@@ -82,12 +82,13 @@ public class DatasetValidator : MonoBehaviour
     [Tooltip("Можно ли использовать датасет.")]
     public bool isValid = false;
 
-    [Tooltip("Готовность датасета к использованию.")]
-    public UnityAction OnReady;
+    [Tooltip("Событие завершения валидации.")]
+    public UnityAction onReady;
 
 
-    [ContextMenu("Загрузить датасет")]
-    public void LoadDataset()
+
+    [ContextMenu("Валидировать датасет.")]
+    public void ValidateDataset()
     {
         ResetAllData();
 
@@ -110,9 +111,6 @@ public class DatasetValidator : MonoBehaviour
         // Проверка правильности датасета:
         StartCoroutine(Validate(trainPath, testPath));
     }
-
-
-    #region ВАЛИДАЦИЯ
     /// <summary>
     /// Проверяет правильность датасета.
     /// </summary>
@@ -122,9 +120,7 @@ public class DatasetValidator : MonoBehaviour
         yield return ValidateImageDistribution(trainPath, testPath);
         yield return ValidateImageSizesAndCollectPaths(trainPath, testPath);
 
-        verdict += "Датасет пригоден для использования.";
-        isValid = true;
-        OnReady?.Invoke();
+        stopValidation(true, "Датасет пригоден для использования");
     }
 
     /// <summary>
@@ -147,7 +143,7 @@ public class DatasetValidator : MonoBehaviour
         // Проверяем, совпадают ли категории
         if (!trainCategories.SequenceEqual(testCategories))
         {
-            stopValidation("Категории изображений обучающей выборки не совпадают с категориями тестовых изображений");
+            stopValidation(false, "Категории изображений обучающей выборки не совпадают с категориями тестовых изображений");
         }
 
         categoryNames = trainCategories;
@@ -178,9 +174,6 @@ public class DatasetValidator : MonoBehaviour
         // Проверяем, если в trainCategories есть разные значения в count
         int expectedCount = trainCategories.First().count;
         bool isBalanced = trainCategories.All(c => c.count == expectedCount);
-        verdict = "В обучающей выборке в каждой категории разное количество изображений. ";
-
-
 
 
         // Тестовая выборка:
@@ -237,7 +230,7 @@ public class DatasetValidator : MonoBehaviour
                         imageSize = new Vector2Int(tex.width, tex.height);
                     else if (imageSize.x != tex.width || imageSize.y != tex.height)
                     {
-                        stopValidation("Разрешения изображений не стандартизированы.");
+                        stopValidation(false, "Разрешения изображений не стандартизированы.");
                         yield break;
                     }
 
@@ -261,42 +254,27 @@ public class DatasetValidator : MonoBehaviour
             }
         }
     }
-    #endregion
-
 
     /// <summary>
-    /// Экстренное завершение валидации.
+    /// Завершение валидации.
     /// </summary>
-    void stopValidation(string text)
+    void stopValidation(bool isValid, string text)
     {
-        verdict = text;
-        StopAllCoroutines();
-        OnReady?.Invoke();
-    }
+        if (isValid)
+        {
+            verdict = text;
+            this.isValid = true;
+        }
+        else
+        {
+            verdict = text;
+            this.isValid = false;
+            StopAllCoroutines();
+        }
 
-    /// <summary>
-    /// Получить индекс категории по её названию.
-    /// </summary>
-    public int GetCategoryIndexByName(string categoryName)
-    {
-        if (categoryNames == null) throw new ArgumentNullException(nameof(categoryNames));
-        int index = categoryNames.IndexOf(categoryName);
-        if (index == -1)
-            throw new ArgumentException($"Категория с именем \"{categoryName}\" не найдена.");
-        return index;
+        onReady?.Invoke();
     }
-
-    /// <summary>
-    /// Получить название категории по её индексу.
-    /// </summary>
-    public string GetCategoryNameByIndex(int index)
-    {
-        if (categoryNames == null) throw new ArgumentNullException(nameof(categoryNames));
-        if (index < 0 || index >= categoryNames.Count)
-            throw new ArgumentOutOfRangeException(nameof(index), $"Индекс {index} вне диапазона категорий.");
-        return categoryNames[index];
-    }
-
+    
     /// <summary>
     /// Полностью очищает все данные валидатора.
     /// </summary>

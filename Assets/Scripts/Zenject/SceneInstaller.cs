@@ -23,5 +23,7 @@ public class SceneInstaller : MonoInstaller
 
         Container.Bind<LayersGenerator>().FromInstance(layersGenerator).AsSingle();
         Container.Bind<LinesGenerator>().FromInstance(connectionsGenerator).AsSingle();
+
+        Container.Bind<CategoryManager>().AsSingle();
     }
 }

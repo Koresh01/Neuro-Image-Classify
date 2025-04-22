@@ -1,11 +1,11 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using Zenject;
 
-[AddComponentMenu("Custom/UICanvasInstaller (Бинды UI)")]
+[AddComponentMenu("Custom/UICanvasInstaller (Р‘РёРЅРґС‹ UI)")]
 public class UICanvasInstaller : MonoInstaller
 {
-    [Tooltip("Контроллер всплывающих панелей.")]
-    [SerializeField] private PopUpPanelsController popUpPanelsController;
+    [Tooltip("РљРѕРЅС‚СЂРѕР»Р»РµСЂ РІСЃРїР»С‹РІР°СЋС‰РёС… РїР°РЅРµР»РµР№.")]
+    [SerializeField] PopUpPanelsController popUpPanelsController;
     public override void InstallBindings()
     {
         Container.Bind<PopUpPanelsController>().FromInstance(popUpPanelsController).AsSingle();

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using Zenject;
 
 [AddComponentMenu("Custom/LoadingPanel (Логика слайдеров загрузки)")]
-public class LoadingPanel : MonoBehaviour
+public class DatasetValidationPanel : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
 
@@ -19,13 +19,13 @@ public class LoadingPanel : MonoBehaviour
 
     void OnEnable()
     {
-        datasetValidator.OnReady += EnableContinueButton;
+        datasetValidator.onReady += EnableContinueButton;
     }
 
     void OnDisable()
     {
-        datasetValidator.OnReady -= EnableContinueButton;
-        
+        datasetValidator.onReady -= EnableContinueButton;
+
         verdict.text = "Вердикт:" + "  ---";
         continueBtn.interactable = false;
     }

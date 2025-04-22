@@ -37,7 +37,7 @@ public class Network : MonoBehaviour
     [Inject] DatasetValidator datasetValidator;
 
     [Tooltip("Готовность нейросети к использованию.")]
-    public UnityAction onReady;
+    public bool isReady = false;
 
     [Header("Слои:")]
     public List<Matrix> t;
@@ -65,37 +65,36 @@ public class Network : MonoBehaviour
     /// </summary>
     int y;
 
+
     void OnEnable()
     {
-        datasetValidator.OnReady += Init;
+        datasetValidator.onReady += Init;
     }
 
-    private void OnDisable()
+    void OnDisable()
     {
-        datasetValidator.OnReady -= Init;
+        datasetValidator.onReady -= Init;
     }
 
     #region ИНИЦИАЛИЗАЦИЯ
     /// <summary>
     /// Датасет валиден, значит указываем конфигурацию нейросети.
     /// </summary>
+    [ContextMenu("Инициализировать матрицы нейросети.")]
     void Init()
     {
-        if (datasetValidator.isValid)
-        {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
 
-            InitIntermediateLayers();
-            InitActivatedLayers();
-            InitWeights();
-            InitBiases();
+        InitIntermediateLayers();
+        InitActivatedLayers();
+        InitWeights();
+        InitBiases();
 
-            stopwatch.Stop();
-            UnityEngine.Debug.Log($"Создание матриц Numpy: {stopwatch.Elapsed.TotalSeconds} секунд");
+        stopwatch.Stop();
+        UnityEngine.Debug.Log($"Создание матриц Numpy: {stopwatch.Elapsed.TotalSeconds} секунд");
 
-            onReady?.Invoke();
-        }
+        isReady = true;
     }
 
     /// <summary>
