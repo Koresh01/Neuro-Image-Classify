@@ -35,6 +35,7 @@ public class PredictionResult
 public class Network : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
+    [Inject] NetworkConfigPanel networkConfigPanel;
 
     [Tooltip("Готовность нейросети к использованию.")]
     public bool isReady = false;
@@ -64,17 +65,6 @@ public class Network : MonoBehaviour
     /// Истиный индекс категории изображения.
     /// </summary>
     int y;
-
-
-    void OnEnable()
-    {
-        datasetValidator.onReady += Init;
-    }
-
-    void OnDisable()
-    {
-        datasetValidator.onReady -= Init;
-    }
 
     #region ИНИЦИАЛИЗАЦИЯ
     /// <summary>

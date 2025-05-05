@@ -1,21 +1,21 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-[AddComponentMenu("Custom/PopUpPanelsController (Контроллер всплывающих панелей.)")]
+[AddComponentMenu("Custom/PopUpPanelsController (РљРѕРЅС‚СЂРѕР»Р»РµСЂ РІСЃРїР»С‹РІР°СЋС‰РёС… РїР°РЅРµР»РµР№.)")]
 public class PopUpPanelsController : MonoBehaviour
 {
-    [Header("Всплывающие панели:")]
+    [Header("Р’СЃРїР»С‹РІР°СЋС‰РёРµ РїР°РЅРµР»Рё:")]
     [SerializeField] private List<GameObject> panels;
 
     private void Start()
     {
         foreach (GameObject panel in panels)
         {
-            Button closeBtn = panel.GetComponentInChildren<Button>();
-            
-            // Используем лямбда-выражение для передачи параметра
+            Button closeBtn = panel.transform.Find("Button (Р—Р°РєСЂС‹С‚СЊ РїР°РЅРµР»СЊРєСѓ)").GetComponent<Button>();
+
+            // РСЃРїРѕР»СЊР·СѓРµРј Р»СЏРјР±РґР°-РІС‹СЂР°Р¶РµРЅРёРµ РґР»СЏ РїРµСЂРµРґР°С‡Рё РїР°СЂР°РјРµС‚СЂР°
             closeBtn.onClick.AddListener(() => ClosePanel(panel));
 
         }
@@ -29,7 +29,7 @@ public class PopUpPanelsController : MonoBehaviour
                 return panel;
         }
 
-        throw new ArgumentException("Не нашли панель с таким именем");
+        throw new ArgumentException("РќРµ РЅР°С€Р»Рё РїР°РЅРµР»СЊ СЃ С‚Р°РєРёРј РёРјРµРЅРµРј");
     }
 
     private void ClosePanel(GameObject panel)
@@ -38,9 +38,9 @@ public class PopUpPanelsController : MonoBehaviour
     }
 
     /// <summary>
-    /// Закрывает панель.
+    /// Р—Р°РєСЂС‹РІР°РµС‚ РїР°РЅРµР»СЊ.
     /// </summary>
-    /// <param name="name">Название панели.</param>
+    /// <param name="name">РќР°Р·РІР°РЅРёРµ РїР°РЅРµР»Рё.</param>
     public void ClosePanel(string name)
     {
         GameObject panel = GetPanel(name);
@@ -48,9 +48,9 @@ public class PopUpPanelsController : MonoBehaviour
     }
 
     /// <summary>
-    /// Показывает панель с указанным именем.
+    /// РџРѕРєР°Р·С‹РІР°РµС‚ РїР°РЅРµР»СЊ СЃ СѓРєР°Р·Р°РЅРЅС‹Рј РёРјРµРЅРµРј.
     /// </summary>
-    /// <param name="name">Имя панели.</param>
+    /// <param name="name">РРјСЏ РїР°РЅРµР»Рё.</param>
     public void ShowPanel(string name)
     {
 
