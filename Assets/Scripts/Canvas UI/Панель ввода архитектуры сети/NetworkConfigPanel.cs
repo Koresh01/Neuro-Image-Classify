@@ -5,7 +5,7 @@ using Zenject;
 /// <summary>
 /// Как только запускается UI панель настройки слоёв нейросети нужно сказать этой панели сколько нейронов у нас на первом слое, а сколько на выходном.
 /// </summary>
-class NetworkConfigPanelView : MonoBehaviour
+class NetworkConfigPanel : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
 

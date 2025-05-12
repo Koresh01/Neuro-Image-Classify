@@ -8,10 +8,10 @@ public class UICanvasInstaller : MonoInstaller
     [SerializeField] PopUpPanelsController popUpPanelsController;
 
     [Tooltip("Настройщик промежуточных слоёв нейросети.")]
-    [SerializeField] ScrollViewOfMiddleLayers scrollViewOfMiddleLayers;
+    [SerializeField] MiddleLayersScrollView scrollViewOfMiddleLayers;
     public override void InstallBindings()
     {
         Container.Bind<PopUpPanelsController>().FromInstance(popUpPanelsController).AsSingle();
-        Container.Bind<ScrollViewOfMiddleLayers>().FromInstance(scrollViewOfMiddleLayers).AsSingle();
+        Container.Bind<MiddleLayersScrollView>().FromInstance(scrollViewOfMiddleLayers).AsSingle();
     }
 }

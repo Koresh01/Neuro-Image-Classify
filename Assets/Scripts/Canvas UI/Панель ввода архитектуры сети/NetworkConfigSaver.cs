@@ -1,40 +1,67 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-
+using Zenject;
+using System.Collections.Generic;
 
 /// <summary>
-/// Пользователь сам настраивает сколько промежуточных слоёв нейросети он хочет. Это делается через UI панель "Настройка архитекрутры сети".
-/// Текущий скрипт обрабатывает кнопки "сохранить" / "отменить" инициализацию размеров слоёв сети и их кол-ва.
+/// Обрабатывает действия пользователя по настройке архитектуры нейросети: количество и размеры скрытых слоёв.
 /// </summary>
 class NetworkConfigSaver : MonoBehaviour
 {
-    [Header("Сохранение/отмена:")]
-    [SerializeField] Button save;
-    [SerializeField] Button abort;
+    [Inject] private DatasetValidator datasetValidator;
+    [Inject] private Network network;
 
+    [Header("Vertical Scroll View")]
+    [SerializeField] private Transform content;
 
-    void OnEnable()
+    [Header("Сохранение")]
+    [SerializeField] private Button saveButton;
+
+    private void OnEnable()
     {
+        saveButton.onClick.AddListener(SaveConfig);
+    }
+
+    private void OnDisable()
+    {
+        saveButton.onClick.RemoveListener(SaveConfig);
+    }
+
+    /// <summary>
+    /// Считывает данные из UI и пересоздаёт архитектуру нейросети.
+    /// </summary>
+    private void SaveConfig()
+    {
+        int inputDim = datasetValidator.imageSize[0] * datasetValidator.imageSize[1];
+        int outputDim = datasetValidator.categoryNames.Count;
+
+        List<Matrix> layers = new List<Matrix>();
+
+        // Входной слой
+        layers.Add(Numpy.Zeros(1, inputDim));
+
+        // Промежуточные слои
+        for (int i = 0; i < content.childCount; i++)
+        {
+            var inputField = content.GetChild(i).GetComponentInChildren<InputField>();
+
+            if (!int.TryParse(inputField.text, out int neurons) || neurons <= 0)
+            {
+                Debug.LogWarning($"Некорректное значение нейронов в слое {i}: '{inputField.text}'");
+                continue;
+            }
+
+            layers.Add(Numpy.Zeros(1, neurons));
+        }
+
+        // Выходной слой
+        layers.Add(Numpy.Zeros(1, outputDim));
+
         /*
-        При сохранении мы должны взять все дочерние
-        
-        <LayerElement>
-        
-        из контейнера
-        
-        Transform context 
+         layers - это есть ни что иное как t[] слои нейросети. Надо теперь как то занова инициализировать нейронную сеть...
+         */
 
-        И посмотреть какое значение сформировано в каждом образце слоя нейросети.
-
-        На основе InputDim, OutDim, и List<int> middleDims построить numpy массив t[] и передать его как то в Network.
-        */
+        // Передаём конфигурацию в сеть
+        network.SetArchitecture(layers);
     }
-
-    void OnDisable()
-    {
-        
-    }
-
-    
-
 }

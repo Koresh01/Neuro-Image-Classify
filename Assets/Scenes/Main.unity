@@ -5234,8 +5234,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e03c482279d6724ba646be72f404d4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  save: {fileID: 138654302}
-  abort: {fileID: 1666955567}
+  content: {fileID: 1580288583}
+  saveButton: {fileID: 138654302}
 --- !u!1 &1271962068
 GameObject:
   m_ObjectHideFlags: 0

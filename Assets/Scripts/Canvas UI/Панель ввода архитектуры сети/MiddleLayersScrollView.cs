@@ -4,9 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Контроллер промежуточных слоёв нейросети. На панели настройки этих слоёв пользователем имеется Vertical Scroll View, задача этого скрипта синхронизировать работу этого вертикального списка с тем что там вводится.
+/// Контролирует отображение скрытых слоёв нейросети в вертикальном ScrollView.
 /// </summary>
-public class ScrollViewOfMiddleLayers : MonoBehaviour
+public class MiddleLayersScrollView : MonoBehaviour
 {
     [Inject] private Network network;
 

@@ -35,7 +35,7 @@ public class PredictionResult
 public class Network : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
-    [Inject] ScrollViewOfMiddleLayers networkConfigPanel;
+    [Inject] MiddleLayersScrollView networkConfigPanel;
 
     [Tooltip("Готовность нейросети к использованию.")]
     public bool isReady = false;
@@ -85,6 +85,12 @@ public class Network : MonoBehaviour
         UnityEngine.Debug.Log($"Создание матриц Numpy: {stopwatch.Elapsed.TotalSeconds} секунд");
 
         isReady = true;
+    }
+
+    public void SetArchitecture(List<Matrix> newLayers)
+    {
+        t = newLayers;
+        Init(); // инициализировать всё остальное: h, W, B
     }
 
     /// <summary>
