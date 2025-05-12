@@ -35,7 +35,7 @@ public class PredictionResult
 public class Network : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
-    [Inject] NetworkConfigPanel networkConfigPanel;
+    [Inject] ScrollViewOfMiddleLayers networkConfigPanel;
 
     [Tooltip("Готовность нейросети к использованию.")]
     public bool isReady = false;

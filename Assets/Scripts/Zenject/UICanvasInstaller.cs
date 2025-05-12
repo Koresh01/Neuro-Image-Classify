@@ -7,11 +7,11 @@ public class UICanvasInstaller : MonoInstaller
     [Tooltip("Контроллер всплывающих панелей.")]
     [SerializeField] PopUpPanelsController popUpPanelsController;
 
-    [Tooltip("Панель ввода конфигурации слоёв сети.")]
-    [SerializeField] NetworkConfigPanel networkConfigPanel;
+    [Tooltip("Настройщик промежуточных слоёв нейросети.")]
+    [SerializeField] ScrollViewOfMiddleLayers scrollViewOfMiddleLayers;
     public override void InstallBindings()
     {
         Container.Bind<PopUpPanelsController>().FromInstance(popUpPanelsController).AsSingle();
-        Container.Bind<NetworkConfigPanel>().FromInstance(networkConfigPanel).AsSingle();
+        Container.Bind<ScrollViewOfMiddleLayers>().FromInstance(scrollViewOfMiddleLayers).AsSingle();
     }
 }
