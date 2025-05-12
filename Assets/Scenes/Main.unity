@@ -1201,8 +1201,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   content: {fileID: 1580288583}
-  layerObj: {fileID: 4863804315533168714, guid: 3c9680ed5d900ca47b77d7e308f1d89f, type: 3}
-  addLayer: {fileID: 283558564}
+  layerPrefab: {fileID: 4863804315533168714, guid: 3c9680ed5d900ca47b77d7e308f1d89f, type: 3}
+  addButton: {fileID: 283558564}
 --- !u!1 &187175765
 GameObject:
   m_ObjectHideFlags: 0
@@ -6474,7 +6474,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isReady: 0
-  t: []
+  t:
+  - rows: 1
+    columns: 0
+  - rows: 1
+    columns: 256
+  - rows: 1
+    columns: 0
   h: []
   W: []
   B: []

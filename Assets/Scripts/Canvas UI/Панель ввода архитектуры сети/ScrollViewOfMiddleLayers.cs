@@ -8,33 +8,59 @@ using UnityEngine.UI;
 /// </summary>
 public class ScrollViewOfMiddleLayers : MonoBehaviour
 {
-    [Header("Vertical Scroll View:")]
-    [SerializeField] Transform content;
+    [Inject] private Network network;
 
-    [Header("Префаб эл-та вертикального списка:")]
-    [SerializeField] GameObject layerObj;
+    [Header("Vertical Scroll View")]
+    [SerializeField] private Transform content;
 
-    [Header("+/- слой:")]
-    [SerializeField] Button addLayer;
+    [Header("Префаб элемента слоя")]
+    [SerializeField] private GameObject layerPrefab;
 
-    void OnEnable()
+    [Header("+/- слой")]
+    [SerializeField] private Button addButton;
+
+    private void OnEnable()
     {
-        addLayer.onClick.AddListener(AddLayer);
+        Refresh();
+        addButton.onClick.AddListener(AddLayer);
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
-        addLayer.onClick.RemoveAllListeners();
+        addButton.onClick.RemoveListener(AddLayer);
     }
-
-    
-
 
     /// <summary>
-    /// Добавляет образец слоя в scroll view.
+    /// Очищает ScrollView и заполняет его слоями из сети.
     /// </summary>
-    void AddLayer()
+    private void Refresh()
     {
-        GameObject obj = Instantiate(layerObj, content);
+        ClearContent();
+
+        // Пропускаем входной (0) и выходной (последний) слой
+        for (int i = 1; i < network.t.Count - 1; i++)
+        {
+            var layer = Instantiate(layerPrefab, content);
+            layer.GetComponentInChildren<InputField>().text = network.t[i].GetLength(1).ToString();
+        }
+    }
+
+    /// <summary>
+    /// Удаляет все дочерние элементы из контента.
+    /// </summary>
+    private void ClearContent()
+    {
+        for (int i = content.childCount - 1; i >= 0; i--)
+        {
+            Destroy(content.GetChild(i).gameObject);
+        }
+    }
+
+    /// <summary>
+    /// Добавляет новый слой в ScrollView.
+    /// </summary>
+    private void AddLayer()
+    {
+        Instantiate(layerPrefab, content);
     }
 }
