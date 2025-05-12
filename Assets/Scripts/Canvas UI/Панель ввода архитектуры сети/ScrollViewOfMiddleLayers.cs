@@ -19,25 +19,22 @@ public class ScrollViewOfMiddleLayers : MonoBehaviour
 
     void OnEnable()
     {
-
+        addLayer.onClick.AddListener(AddLayer);
     }
 
     void OnDisable()
     {
-        
+        addLayer.onClick.RemoveAllListeners();
     }
 
     
 
 
-    [ContextMenu("Добавить слой.")]
+    /// <summary>
+    /// Добавляет образец слоя в scroll view.
+    /// </summary>
     void AddLayer()
     {
         GameObject obj = Instantiate(layerObj, content);
-    }
-
-    void RemoveLayer(GameObject layerSetting)
-    {
-
     }
 }

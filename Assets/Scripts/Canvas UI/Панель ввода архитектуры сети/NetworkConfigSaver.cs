@@ -15,12 +15,26 @@ class NetworkConfigSaver : MonoBehaviour
 
     void OnEnable()
     {
+        /*
+        При сохранении мы должны взять все дочерние
         
+        <LayerElement>
+        
+        из контейнера
+        
+        Transform context 
+
+        И посмотреть какое значение сформировано в каждом образце слоя нейросети.
+
+        На основе InputDim, OutDim, и List<int> middleDims построить numpy массив t[] и передать его как то в Network.
+        */
     }
 
     void OnDisable()
     {
         
     }
+
+    
 
 }
