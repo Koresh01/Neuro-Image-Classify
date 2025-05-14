@@ -9,7 +9,8 @@ using System.Collections.Generic;
 class NetworkConfigSaver : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
-    [Inject] private Network network;
+    [Inject] Network network;
+    [Inject] NetworkVizualizer networkVizualizer;
 
     [Header("Vertical Scroll View")]
     [SerializeField] private Transform content;
@@ -48,6 +49,7 @@ class NetworkConfigSaver : MonoBehaviour
         // Передаём конфигурацию в сеть
         network.Init(t_midterm);
         architecturePanel.SetActive(false);
+        networkVizualizer.Vizualize();
     }
 
     /// <summary>
