@@ -176,7 +176,7 @@ public class Network : MonoBehaviour
             h[i+1] = MatrixUtils.Sigmoid(t[i + 1]);
             // UnityEngine.Debug.Log($"t[{i+1}] \t max: {Numpy.Max(t[i+1])} \t min: {Numpy.Min(t[i+1])} \t h[{i + 1}] \t max: {Numpy.Max(h[i + 1])} \t min: {Numpy.Min(h[i + 1])}");
         }
-        Matrix lastLayer = t[t.Count - 1];  // последний слой, к которому не применялась функция активации.
+        Matrix lastLayer = t[^1];  // последний слой, к которому не применялась функция активации.
         z = MatrixUtils.SoftMax(lastLayer);
     }
 
@@ -191,7 +191,7 @@ public class Network : MonoBehaviour
         Matrix dE_dB = dE_dt;
         ApplyGradientStep(dE_dW, dE_dB, t.Count-2);
         Matrix dE_dh = dE_dt ^ W[t.Count - 2].T();
-        dE_dt = dE_dh * MatrixUtils.SigmoidDeriv(t[t.Count - 2]);
+        dE_dt = dE_dh * MatrixUtils.SigmoidDeriv(t[^2]);
 
         //
         for (int i = t.Count-3; i >= 1; i--)
