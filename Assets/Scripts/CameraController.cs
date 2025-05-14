@@ -64,8 +64,12 @@ public class FreeCameraController : MonoBehaviour
         if (Input.GetKey(KeyCode.Q)) move += Vector3.down;
         if (Input.GetKey(KeyCode.E)) move += Vector3.up;
 
-        transform.position += move.normalized * moveSpeed * Time.deltaTime;
+        // Если зажат Shift — увеличиваем скорость вдвое
+        float currentSpeed = moveSpeed * (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) ? 2f : 1f);
+
+        transform.position += move.normalized * currentSpeed * Time.deltaTime;
     }
+
 
     void HandleMouseLook()
     {
