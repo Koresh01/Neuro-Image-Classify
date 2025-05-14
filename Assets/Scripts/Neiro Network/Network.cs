@@ -35,7 +35,6 @@ public class PredictionResult
 public class Network : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
-    [Inject] MiddleLayersScrollView networkConfigPanel;
 
     [Tooltip("Готовность нейросети к использованию.")]
     public bool isReady = false;
@@ -66,11 +65,16 @@ public class Network : MonoBehaviour
     /// </summary>
     int y;
 
-    #region ИНИЦИАЛИЗАЦИЯ
+
+    public void SetArchitecture(List<Matrix> newLayers)
+    {
+        t = newLayers;
+        Init(); // инициализировать всё остальное: h, W, B
+    }
+
     /// <summary>
     /// Датасет валиден, значит указываем конфигурацию нейросети.
     /// </summary>
-    [ContextMenu("Инициализировать матрицы нейросети.")]
     void Init()
     {
         Stopwatch stopwatch = new Stopwatch();
@@ -85,12 +89,6 @@ public class Network : MonoBehaviour
         UnityEngine.Debug.Log($"Создание матриц Numpy: {stopwatch.Elapsed.TotalSeconds} секунд");
 
         isReady = true;
-    }
-
-    public void SetArchitecture(List<Matrix> newLayers)
-    {
-        t = newLayers;
-        Init(); // инициализировать всё остальное: h, W, B
     }
 
     /// <summary>
@@ -157,56 +155,7 @@ public class Network : MonoBehaviour
             B.Add(Numpy.Random.Randn(1, to));
         }
     }
-    #endregion
 
-    #region ДОПФУНКЦИИ
-    public Matrix Sigmoid(Matrix t)
-    {
-        Matrix res = 1 / (1 + (Numpy.Exp(-t)));
-        return res;
-    }
-    /// <summary>
-    /// Произовдная от sigmoid.
-    /// </summary>
-    /// <returns>Вектор, к каждому элементу которого применена произовдная</returns>
-    Matrix Sigmoid_deriv(Matrix t)
-    {
-        Matrix sigmoid = 1 / (1 + Numpy.Exp(-t));
-        return sigmoid * (1 - sigmoid);
-    }
-
-    /// <summary>
-    /// Нормализует значение выходного вектора.
-    /// <returns>Вектор вероятности отношения изображения к определённой категории.</returns>
-    Matrix SoftMax(Matrix t)
-    {
-        Matrix exp = Numpy.Exp(t);
-        return exp / Numpy.Sum(exp);
-    }
-
-    /// <summary>
-    /// Вычисляет величину обшибки.
-    /// <param name="z">Вектор вероятностей</param>
-    /// <param name="y">Индекс правильной категории</param>
-    /// <returns>float значение величины ошибки.</returns>
-    float CrossEntropy(Matrix z, int y)    // это разреженная крос-энтропия, т.к. здесь y - это индекс, а не вектор.
-    {
-        return -MathF.Log((z[0, y]));
-    }
-
-    /// <summary>
-    /// One-hot encoding
-    /// </summary>
-    /// <param name="y">Индекс истиной категории изображения.</param>
-    /// <returns>Вектор правильного ответа. Нулевой вектор, с единицей по индексу истиной категории изображения.</returns>
-    Matrix to_full(int y)
-    {
-        int num_classes = t[t.Count - 1].GetLength(1);
-        Matrix y_full = Numpy.Zeros(1, num_classes);
-        y_full[0, y] = 1;
-        return y_full;
-
-    }
 
     /// <summary>
     /// Применяет шаг градиентного спуска к весам указанного слоя.
@@ -215,32 +164,26 @@ public class Network : MonoBehaviour
     void ApplyGradientStep(Matrix dE_dW, Matrix dE_dB, int layer)
     {
         W[layer] -= (learningRate * dE_dW);
-        B[layer] -= (learningRate * dE_dB);   
+        B[layer] -= (learningRate * dE_dB);
     }
-    #endregion
 
-
-
-
-
-
-    
     void ForwardPropogation()
     {   
         // Проход:
         for (int i = 0; i < t.Count-1; i++)
         {
             t[i+1] = (h[i] ^ W[i]) + B[i];    // Осторожно, h[0] должен быть таким же как t[0], это входной слой.
-            h[i+1] = Sigmoid(t[i + 1]);
+            h[i+1] = MatrixUtils.Sigmoid(t[i + 1]);
             // UnityEngine.Debug.Log($"t[{i+1}] \t max: {Numpy.Max(t[i+1])} \t min: {Numpy.Min(t[i+1])} \t h[{i + 1}] \t max: {Numpy.Max(h[i + 1])} \t min: {Numpy.Min(h[i + 1])}");
         }
         Matrix lastLayer = t[t.Count - 1];  // последний слой, к которому не применялась функция активации.
-        z = SoftMax(lastLayer);
+        z = MatrixUtils.SoftMax(lastLayer);
     }
+
     void BackPropogation()
     {
         // One hot encoding
-        Matrix y_full = to_full(y);
+        Matrix y_full = MatrixUtils.ToFull(y, t[^1].GetLength(1));
 
         // Последний слой:
         Matrix dE_dt = z - y_full;
@@ -248,7 +191,7 @@ public class Network : MonoBehaviour
         Matrix dE_dB = dE_dt;
         ApplyGradientStep(dE_dW, dE_dB, t.Count-2);
         Matrix dE_dh = dE_dt ^ W[t.Count - 2].T();
-        dE_dt = dE_dh * Sigmoid_deriv(t[t.Count - 2]);
+        dE_dt = dE_dh * MatrixUtils.SigmoidDeriv(t[t.Count - 2]);
 
         //
         for (int i = t.Count-3; i >= 1; i--)
@@ -257,7 +200,7 @@ public class Network : MonoBehaviour
             dE_dB = dE_dt;
             ApplyGradientStep(dE_dW, dE_dB, i);
             dE_dh = dE_dt ^ W[i].T();
-            dE_dt = dE_dh * Sigmoid_deriv(t[i]);
+            dE_dt = dE_dh * MatrixUtils.SigmoidDeriv(t[i]);
         }
 
         // Первый слой немного отличается:
@@ -281,7 +224,7 @@ public class Network : MonoBehaviour
         ForwardPropogation();
 
         // Значение функции потерь (Cross-Entropy)
-        float Error = CrossEntropy(z, y);
+        float Error = MatrixUtils.CrossEntropy(z, y);
 
         BackPropogation();
 
