@@ -844,7 +844,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 141816788}
   m_TextComponent: {fileID: 1158834291}
   m_Placeholder: {fileID: 0}
@@ -1201,7 +1201,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   content: {fileID: 1580288583}
-  layerPrefab: {fileID: 4863804315533168714, guid: 3c9680ed5d900ca47b77d7e308f1d89f, type: 3}
+  layerSetupElement_Prefab: {fileID: 4863804315533168714, guid: 3c9680ed5d900ca47b77d7e308f1d89f, type: 3}
   addButton: {fileID: 283558564}
 --- !u!1 &187175765
 GameObject:
@@ -5006,7 +5006,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1100083999}
   m_TextComponent: {fileID: 825415379}
   m_Placeholder: {fileID: 0}
@@ -5232,6 +5232,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   content: {fileID: 1580288583}
+  architecturePanel: {fileID: 1568668148}
   saveButton: {fileID: 138654302}
 --- !u!1 &1271962068
 GameObject:
@@ -6474,13 +6475,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isReady: 0
-  t:
-  - rows: 1
-    columns: 0
-  - rows: 1
-    columns: 256
-  - rows: 1
-    columns: 0
+  t: []
   h: []
   W: []
   B: []

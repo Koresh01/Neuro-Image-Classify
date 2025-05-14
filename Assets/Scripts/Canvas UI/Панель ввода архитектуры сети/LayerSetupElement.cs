@@ -2,9 +2,9 @@
 using UnityEngine.UI;
 
 /// <summary>
-/// У нас есть UI панель для настройки слоёв и нейронов пользователем. На этой панели имеется vertical scroll view с образцами слоёв нейросети, где можно вписать кол-во нейронов конкретного слоя. Текущий скрипт висит на каждом образце слоя.
+/// Скрипт для управления элементом настройки слоя нейросети, который позволяет пользователю задать количество нейронов для каждого слоя через UI.
 /// </summary>
-public class LayerElement : MonoBehaviour
+public class LayerSetupElement : MonoBehaviour
 {
     [SerializeField] InputField neironsNumber;
     [SerializeField] Button delBtn;

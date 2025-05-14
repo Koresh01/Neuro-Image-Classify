@@ -14,7 +14,7 @@ public class MiddleLayersScrollView : MonoBehaviour
     [SerializeField] private Transform content;
 
     [Header("Префаб элемента слоя")]
-    [SerializeField] private GameObject layerPrefab;
+    [SerializeField] private GameObject layerSetupElement_Prefab;
 
     [Header("+/- слой")]
     [SerializeField] private Button addButton;
@@ -40,7 +40,7 @@ public class MiddleLayersScrollView : MonoBehaviour
         // Пропускаем входной (0) и выходной (последний) слой
         for (int i = 1; i < network.t.Count - 1; i++)
         {
-            var layer = Instantiate(layerPrefab, content);
+            var layer = Instantiate(layerSetupElement_Prefab, content);
             layer.GetComponentInChildren<InputField>().text = network.t[i].GetLength(1).ToString();
         }
     }
@@ -61,6 +61,6 @@ public class MiddleLayersScrollView : MonoBehaviour
     /// </summary>
     private void AddLayer()
     {
-        Instantiate(layerPrefab, content);
+        Instantiate(layerSetupElement_Prefab, content);
     }
 }

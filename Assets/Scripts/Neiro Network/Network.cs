@@ -65,22 +65,15 @@ public class Network : MonoBehaviour
     /// </summary>
     int y;
 
-
-    public void SetArchitecture(List<Matrix> newLayers)
-    {
-        t = newLayers;
-        Init(); // инициализировать всё остальное: h, W, B
-    }
-
     /// <summary>
-    /// Датасет валиден, значит указываем конфигурацию нейросети.
+    /// Устанавливает новую конфигурацию слоёв нейросети.
     /// </summary>
-    void Init()
+    public void Init(List<Matrix> t_midterm)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        InitIntermediateLayers();
+        InitIntermediateLayers(t_midterm);
         InitActivatedLayers();
         InitWeights();
         InitBiases();
@@ -94,18 +87,26 @@ public class Network : MonoBehaviour
     /// <summary>
     /// Инициализирует промежуточные слои.
     /// </summary>
-    void InitIntermediateLayers()
+    void InitIntermediateLayers(List<Matrix> t_midterm)
     {
         int inputDim = datasetValidator.imageSize[0] * datasetValidator.imageSize[1];
         int outputDim = datasetValidator.categoryNames.Count;
+        
+        
+        int totalLayers = t_midterm.Count + 2; // вход + промежуточные + выход
+        t = new List<Matrix>(new Matrix[totalLayers]);
 
         // Входной слой
         t[0] = Numpy.Zeros(1, inputDim);
 
         // Промежуточные слои добавляются через инспектор —> пропускаем
-
+        for (int i = 0; i < t_midterm.Count; i++)
+        {
+            t[i + 1] = t_midterm[i];
+        }
+        
         // Выходной слой
-        t[t.Count - 1] = Numpy.Zeros(1, outputDim);
+        t[^1] = Numpy.Zeros(1, outputDim);
     }
 
     /// <summary>

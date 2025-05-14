@@ -3,9 +3,9 @@ using UnityEngine.UI;
 using Zenject;
 
 /// <summary>
-/// Как только запускается UI панель настройки слоёв нейросети нужно сказать этой панели сколько нейронов у нас на первом слое, а сколько на выходном.
+/// Инициализирует поля ввода для размерности входного и выходного слоёв нейросети на UI панели настроек.
 /// </summary>
-class NetworkConfigPanel : MonoBehaviour
+class NetworkIOConfig : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
 

@@ -4,15 +4,18 @@ using Zenject;
 using System.Collections.Generic;
 
 /// <summary>
-/// Обрабатывает действия пользователя по настройке архитектуры нейросети: количество и размеры скрытых слоёв.
+/// Считывает настройки архитектуры нейросети из UI и обновляет конфигурацию слоёв.
 /// </summary>
 class NetworkConfigSaver : MonoBehaviour
 {
-    [Inject] private DatasetValidator datasetValidator;
+    [Inject] DatasetValidator datasetValidator;
     [Inject] private Network network;
 
     [Header("Vertical Scroll View")]
     [SerializeField] private Transform content;
+
+    [Header("UI панель архитектуры слоёв сети")]
+    [SerializeField] private GameObject architecturePanel;
 
     [Header("Сохранение")]
     [SerializeField] private Button saveButton;
@@ -32,13 +35,30 @@ class NetworkConfigSaver : MonoBehaviour
     /// </summary>
     private void SaveConfig()
     {
-        int inputDim = datasetValidator.imageSize[0] * datasetValidator.imageSize[1];
-        int outputDim = datasetValidator.categoryNames.Count;
+        List<Matrix> t_midterm = new List<Matrix>();
+        if (datasetValidator.isValid)
+        {
+            t_midterm = GenerateMidternLayers();
+        } 
+        else
+        {
+            Debug.LogWarning("Сначала инициализируйте входной и выходной слои, посредством ВАЛИДАЦИИ датасета.");
+        }
 
-        List<Matrix> layers = new List<Matrix>();
+        // Передаём конфигурацию в сеть
+        network.Init(t_midterm);
+        architecturePanel.SetActive(false);
+    }
+
+    /// <summary>
+    /// Создаёт промежуточные слои нейросети. То есть без входного слоя и выходного, основывается при этом на введённые пользователем значения в ScrollView.
+    /// </summary>
+    List<Matrix> GenerateMidternLayers()
+    {
+        List<Matrix> t_midterm = new List<Matrix>();    // Из этой UI панели для настройки слоёв нейросети пользователем, берем только информацию о желаемом кол-ве промежуточных слоёв.
 
         // Входной слой
-        layers.Add(Numpy.Zeros(1, inputDim));
+        // t.Add(Numpy.Zeros(1, inputDim));
 
         // Промежуточные слои
         for (int i = 0; i < content.childCount; i++)
@@ -51,17 +71,12 @@ class NetworkConfigSaver : MonoBehaviour
                 continue;
             }
 
-            layers.Add(Numpy.Zeros(1, neurons));
+            t_midterm.Add(Numpy.Zeros(1, neurons));
         }
 
         // Выходной слой
-        layers.Add(Numpy.Zeros(1, outputDim));
+        // t_midterm.Add(Numpy.Zeros(1, outputDim));
 
-        /*
-         layers - это есть ни что иное как t[] слои нейросети. Надо теперь как то занова инициализировать нейронную сеть...
-         */
-
-        // Передаём конфигурацию в сеть
-        network.SetArchitecture(layers);
+        return t_midterm;
     }
 }
