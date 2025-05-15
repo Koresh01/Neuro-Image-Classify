@@ -22,7 +22,7 @@ public class NetworkVizualizer : MonoBehaviour
         RedrawNetwork(network.h, network.W);
     }
 
-    public void RedrawNetwork(List<Matrix> activations, List<Matrix> weights)
+    void RedrawNetwork(List<Matrix> activations, List<Matrix> weights)
     {
         layersGenerator.DrawLayers(activations);
         linesGenerator.DrawLines(weights);

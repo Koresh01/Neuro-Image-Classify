@@ -6,6 +6,7 @@ using Zenject;
 [AddComponentMenu("Custom/LayersGenerator (Рисует слои нейросети)")]
 public class LayersGenerator : MonoBehaviour
 {
+    [Inject] Network network;
     [Inject] GradientColorPicker colorPicker;
     [Inject] DatasetValidator datasetValidator;
 
@@ -36,7 +37,9 @@ public class LayersGenerator : MonoBehaviour
             AddHiddenLayer(activations[i], i, imgSize);
 
         // Выходной слой
-        AddOutputLayer(activations[^1], activations.Count - 1, imgSize);
+        Matrix lastLayer = network.t[^1];  // последний слой, к которому не применялась функция активации.
+        Matrix z = MatrixUtils.SoftMax(lastLayer);  // вектор вероятностей
+        AddOutputLayer(z, activations.Count - 1, imgSize);
     }
 
     private void AddInputLayer(Matrix matrix, Vector2Int imgSize)
