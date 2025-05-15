@@ -3,7 +3,10 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-[AddComponentMenu("Custom/PopUpPanelsController (Контроллер всплывающих панелей.)")]
+
+/// <summary>
+/// Контроллер всплывающих панелей.
+/// </summary>
 public class PopUpPanelsController : MonoBehaviour
 {
     [Header("Всплывающие панели:")]

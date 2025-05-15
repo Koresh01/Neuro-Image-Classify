@@ -15,6 +15,7 @@ class NetworkTrainer : MonoBehaviour
     [Inject] NetworkVizualizer networkVizualizer;
     [Inject] Network network;
     [Inject] ImageProcessor imageProcessor; // Sinleton, т.к. он не наследуется от MonoBehaviour
+    [Inject] CategoryManager categoryManager;
 
     private CancellationTokenSource cancellationTokenSource;
 
@@ -60,7 +61,7 @@ class NetworkTrainer : MonoBehaviour
                 PredictionResult res = await Task.Run(() => network.Fit(y), token); // передаём token в Task.Run
                 networkVizualizer.Vizualize();
 
-                Debug.Log($"[{count++}/{datasetValidator.trainImagesPaths.Count}] Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {res.PredictedCategoryIndex}");
+                Debug.Log($"[{count++}/{datasetValidator.trainImagesPaths.Count}] Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {categoryManager.GetName(res.PredictedCategoryIndex)}");
             }
         }
         catch (OperationCanceledException)
