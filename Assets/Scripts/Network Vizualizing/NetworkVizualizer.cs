@@ -19,13 +19,13 @@ public class NetworkVizualizer : MonoBehaviour
     [ContextMenu("Переотрисовать нейронку.")]
     public void Vizualize()
     {
-        RedrawNetwork(network.h, network.W);
+        RedrawNetwork();
     }
 
-    void RedrawNetwork(List<Matrix> activations, List<Matrix> weights)
+    void RedrawNetwork()
     {
-        layersGenerator.DrawLayers(activations);
-        linesGenerator.DrawLines(weights);
+        layersGenerator.DrawLayers();
+        linesGenerator.DrawLines();
     }
 
     

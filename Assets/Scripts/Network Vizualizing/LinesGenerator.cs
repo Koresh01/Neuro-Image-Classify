@@ -5,6 +5,7 @@ using Zenject;
 [AddComponentMenu("Custom/LinesGenerator (Рисует связи нейросети)")]
 public class LinesGenerator : MonoBehaviour
 {
+    [Inject] Network network;
     [Inject] GradientColorPicker colorPicker;
     [Inject] LayersGenerator layerVisualizer;
 
@@ -33,16 +34,16 @@ public class LinesGenerator : MonoBehaviour
     }
 
 
-    public void DrawLines(List<Matrix> weights)
+    public void DrawLines()
     {
         lines.Clear();
         rand = new System.Random(12345); // стабильно трогаем одни и те же связи
 
         int indexOffset = 0;
 
-        for (int layer = 0; layer < weights.Count; layer++)
+        for (int layer = 0; layer < network.W.Count; layer++)
         {
-            var weightMatrix = weights[layer];
+            var weightMatrix = network.W[layer];
             int prevCount = weightMatrix.GetLength(0);
             int currCount = weightMatrix.GetLength(1);
 

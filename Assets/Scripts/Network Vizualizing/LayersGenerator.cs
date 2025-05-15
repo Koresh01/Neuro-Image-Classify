@@ -22,7 +22,7 @@ public class LayersGenerator : MonoBehaviour
     [NonSerialized] public List<Vector3> pixelPositions = new();
     [NonSerialized] public List<Color> pixelColors = new();
 
-    public void DrawLayers(List<Matrix> activations)
+    public void DrawLayers()
     {
         pixelPositions.Clear();
         pixelColors.Clear();
@@ -30,16 +30,16 @@ public class LayersGenerator : MonoBehaviour
         Vector2Int imgSize = datasetValidator.imageSize;
 
         // Входной слой
-        AddInputLayer(activations[0], imgSize);
+        AddInputLayer(network.h[0], imgSize);
 
         // Скрытые слои
-        for (int i = 1; i < activations.Count - 1; i++)
-            AddHiddenLayer(activations[i], i, imgSize);
+        for (int i = 1; i < network.h.Count - 1; i++)
+            AddHiddenLayer(network.h[i], i, imgSize);
 
         // Выходной слой
         Matrix lastLayer = network.t[^1];  // последний слой, к которому не применялась функция активации.
         Matrix z = MatrixUtils.SoftMax(lastLayer);  // вектор вероятностей
-        AddOutputLayer(z, activations.Count - 1, imgSize);
+        AddOutputLayer(z, network.t.Count - 1, imgSize);
     }
 
     private void AddInputLayer(Matrix matrix, Vector2Int imgSize)
