@@ -51,7 +51,7 @@ public class Network : MonoBehaviour
     [Header("Нелинейности:")]
     public List<Matrix> B;
 
-    // [SerializeField, Range(0.0001f, 0.4f)]
+    [Header("Шаг обучения:")]
     public float learningRate = 0.0001f;
 
     [Header("Предположение нейросети:")]
