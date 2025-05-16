@@ -7115,6 +7115,7 @@ GameObject:
   - component: {fileID: 1161230366}
   - component: {fileID: 1161230368}
   - component: {fileID: 1161230367}
+  - component: {fileID: 1161230369}
   m_Layer: 5
   m_Name: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430 \u0448\u0430\u0433\u0430
     \u043E\u0431\u0443\u0447\u0435\u043D\u0438\u044F"
@@ -7144,9 +7145,9 @@ RectTransform:
   - {fileID: 2077696547}
   - {fileID: 1850453240}
   - {fileID: 1779247620}
-  - {fileID: 1301368076}
-  - {fileID: 867276153}
   - {fileID: 871503544}
+  - {fileID: 867276153}
+  - {fileID: 1301368076}
   - {fileID: 1120761019}
   m_Father: {fileID: 556208428}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7193,6 +7194,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1161230365}
   m_CullTransparentMesh: 1
+--- !u!114 &1161230369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1161230365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55b31b5e7caca464092bfa592cf3d8ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  learningRateInput: {fileID: 2042330788}
+  increase1: {fileID: 2077696548}
+  increase2: {fileID: 1850453241}
+  increase3: {fileID: 1779247621}
+  decrease1: {fileID: 871503545}
+  decrease2: {fileID: 867276154}
+  decrease3: {fileID: 1301368077}
+  applyButton: {fileID: 1120761020}
 --- !u!1 &1166318797
 GameObject:
   m_ObjectHideFlags: 0
@@ -11704,7 +11725,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 0.001
+  m_Text: 0,001
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
