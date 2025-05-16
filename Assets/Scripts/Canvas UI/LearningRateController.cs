@@ -37,6 +37,12 @@ public class LearningRateController : MonoBehaviour
         applyButton.onClick.AddListener(ApplyLearningRate);
     }
 
+    private void OnEnable()
+    {
+        // Устанавливаем текущее значение шага обучения в поле ввода
+        learningRateInput.text = network.learningRate.ToString("F3");
+    }
+
     /// <summary>
     /// Изменяет значение в input field
     /// </summary>
