@@ -14,8 +14,8 @@ public static class Numpy
         int maxIndex = 0;
         float maxValue = data[0, 0];
 
-        int rows = data.GetLength(0);
-        int cols = data.GetLength(1);
+        int rows = data.Rows;
+        int cols = data.Columns;
 
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
@@ -58,8 +58,8 @@ public static class Numpy
     /// <returns>Новая матрица с применённой функцией exp к каждому элементу</returns>
     public static Matrix Exp(Matrix data)
     {
-        int rows = data.GetLength(0);
-        int cols = data.GetLength(1);
+        int rows = data.Rows;
+        int cols = data.Columns;
         float[,] result = new float[rows, cols];
 
         for (int i = 0; i < rows; i++)
@@ -75,8 +75,8 @@ public static class Numpy
     /// <returns>Новая матрица с применённой функцией логарифма</returns>
     public static Matrix Log(Matrix data)
     {
-        int rows = data.GetLength(0);
-        int cols = data.GetLength(1);
+        int rows = data.Rows;
+        int cols = data.Columns;
         float[,] result = new float[rows, cols];
 
         for (int i = 0; i < rows; i++)
@@ -92,8 +92,8 @@ public static class Numpy
     /// <returns>float значение суммы всех элементов</returns>
     public static float Sum(Matrix data)
     {
-        int rows = data.GetLength(0);
-        int cols = data.GetLength(1);
+        int rows = data.Rows;
+        int cols = data.Columns;
         float sum = 0.0f;
 
         for (int i = 0; i < rows; i++)
@@ -108,8 +108,8 @@ public static class Numpy
     /// </summary>
     public static float Min(Matrix data)
     {
-        int rows = data.GetLength(0);
-        int cols = data.GetLength(1);
+        int rows = data.Rows;
+        int cols = data.Columns;
 
         float minValue = data[0, 0];
         for (int i = 0; i < rows; i++)
@@ -125,8 +125,8 @@ public static class Numpy
     /// </summary>
     public static float Max(Matrix data)
     {
-        int rows = data.GetLength(0);
-        int cols = data.GetLength(1);
+        int rows = data.Rows;
+        int cols = data.Columns;
 
         float maxValue = data[0, 0];
         for (int i = 0; i < rows; i++)

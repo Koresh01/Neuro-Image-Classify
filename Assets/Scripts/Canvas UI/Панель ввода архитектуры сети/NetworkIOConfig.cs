@@ -8,6 +8,7 @@ using Zenject;
 class NetworkIOConfig : MonoBehaviour
 {
     [Inject] DatasetValidator datasetValidator;
+    [Inject] Network network;
 
     [Header("Размерности входного и выходного слоёв нейросети:")]
     [SerializeField] InputField inputDim;
@@ -15,10 +16,7 @@ class NetworkIOConfig : MonoBehaviour
 
     private void OnEnable()
     {
-        if (datasetValidator.isValid)
-            InitFirstAndLastLayer();
-        else
-            Debug.LogWarning("Без валидации датасета неизвестно сколько слоёв на первом и последнем слое.");
+        InitFirstAndLastLayer();
     }
 
     private void OnDisable()

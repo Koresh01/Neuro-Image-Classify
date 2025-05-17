@@ -2,6 +2,7 @@
 using Zenject;
 using System.IO;
 using SFB; // Не забудь подключить StandaloneFileBrowser
+using System.Collections.Generic;
 
 /// <summary>
 /// Импорт/экспорт нейросети в файл из файла.
@@ -9,6 +10,7 @@ using SFB; // Не забудь подключить StandaloneFileBrowser
 public class NetworkPersistence : MonoBehaviour
 {
     [Inject] private Network network;
+    [Inject] private DatasetValidator datasetValidator; // чтобы заполнить [Tooltip("Названия категорий (общие для train и test).")] public List<string> categoryNames;
 
     [AddComponentMenu("Экспорт в .json")]
     public void Save()
@@ -17,9 +19,13 @@ public class NetworkPersistence : MonoBehaviour
         if (string.IsNullOrEmpty(filePath)) return;
 
         NetworkData data = new NetworkData(network);
-        string json = JsonUtility.ToJson(data, true);
 
+        data.categoryNames = new List<string>(datasetValidator.categoryNames); // сохраняем категории
+        data.imageSize = datasetValidator.imageSize;    // сохраняем размер изображения
+
+        string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(filePath, json);
+
         Debug.Log($"Сеть сохранена в файл: {filePath}");
     }
 
@@ -39,8 +45,12 @@ public class NetworkPersistence : MonoBehaviour
         NetworkData data = JsonUtility.FromJson<NetworkData>(json);
         data.ApplyTo(network);
 
+        datasetValidator.categoryNames = new List<string>(data.categoryNames);
+        datasetValidator.imageSize = data.imageSize;
+
         Debug.Log($"Сеть загружена из файла: {filePath}");
     }
+
 
     /// <summary>
     /// Показывает окно выбора файла для ЗАГРУЗКИ .json

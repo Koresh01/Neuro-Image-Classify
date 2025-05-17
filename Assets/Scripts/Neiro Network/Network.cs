@@ -119,7 +119,7 @@ public class Network : MonoBehaviour
 
         for (int i = 0; i < t.Count; i++)
         {
-            h.Add(Numpy.Zeros(1, t[i].GetLength(1))); // Вход и выход не активируем
+            h.Add(Numpy.Zeros(1, t[i].Columns)); // Вход и выход не активируем
         }
     }
 
@@ -133,8 +133,8 @@ public class Network : MonoBehaviour
         for (int i = 0; i < t.Count-1; i++)
         {
             // Матрицы весов между слоями:
-            int curColumns = t[i].GetLength(1);
-            int nextColumns = t[i+1].GetLength(1);
+            int curColumns = t[i].Columns;
+            int nextColumns = t[i+1].Columns;
 
 
             Matrix w = Numpy.Random.Randn(curColumns, nextColumns);
@@ -153,7 +153,7 @@ public class Network : MonoBehaviour
 
         for (int i = 0; i < t.Count - 1; i++)
         {
-            int to = t[i + 1].GetLength(1);
+            int to = t[i + 1].Columns;
             B.Add(Numpy.Random.Randn(1, to));
         }
     }
@@ -169,7 +169,7 @@ public class Network : MonoBehaviour
         B[layer] -= (learningRate * dE_dB);
     }
 
-    void ForwardPropogation()
+    public void ForwardPropogation()
     {   
         // Проход:
         for (int i = 0; i < t.Count-1; i++)
@@ -185,7 +185,7 @@ public class Network : MonoBehaviour
     void BackPropogation()
     {
         // One hot encoding
-        Matrix y_full = MatrixUtils.ToFull(y, t[^1].GetLength(1));
+        Matrix y_full = MatrixUtils.ToFull(y, t[^1].Columns);
 
         // Последний слой:
         Matrix dE_dt = z - y_full;

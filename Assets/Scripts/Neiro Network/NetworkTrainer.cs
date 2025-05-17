@@ -55,7 +55,7 @@ class NetworkTrainer : MonoBehaviour
                 string path = imgData.path;
                 int y = imgData.y;
 
-                Matrix inputVector = imageProcessor.ConvertImageToInputMatrix(path, network.h[0].GetLength(1));
+                Matrix inputVector = imageProcessor.ConvertImageToInputMatrix(path, network.h[0].Columns);
                 network.h[0] = inputVector;
 
                 PredictionResult res = await Task.Run(() => network.Fit(y), token); // передаём token в Task.Run

@@ -203,14 +203,4 @@ public class Matrix
         return new Matrix(result);
     }
 
-    /// <summary>
-    /// Возвращает размерность матрицы.
-    /// 0 - вернёт кол-во строк
-    /// 1 - вернёт кол-во столбцов
-    /// </summary>
-    public int GetLength(int wh)
-    {
-        if (wh == 0) return rows;
-        else return columns;
-    }
 }

@@ -62,7 +62,7 @@ public class LayersGenerator : MonoBehaviour
 
     private void AddHiddenLayer(Matrix matrix, int layerIndex, Vector2Int imgSize)
     {
-        int count = matrix.GetLength(1);
+        int count = matrix.Columns;
         int side = Mathf.CeilToInt(Mathf.Sqrt(count));
 
         for (int i = 0; i < count; i++)
@@ -83,7 +83,7 @@ public class LayersGenerator : MonoBehaviour
 
     private void AddOutputLayer(Matrix matrix, int layerIndex, Vector2Int imgSize)
     {
-        int count = matrix.GetLength(1);
+        int count = matrix.Columns;
 
         for (int x = 0; x < count; x++)
         {

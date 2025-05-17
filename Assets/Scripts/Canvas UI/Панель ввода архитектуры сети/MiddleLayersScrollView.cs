@@ -41,7 +41,7 @@ public class MiddleLayersScrollView : MonoBehaviour
         for (int i = 1; i < network.t.Count - 1; i++)
         {
             var layer = Instantiate(layerSetupElement_Prefab, content);
-            layer.GetComponentInChildren<InputField>().text = network.t[i].GetLength(1).ToString();
+            layer.GetComponentInChildren<InputField>().text = network.t[i].Columns.ToString();
         }
     }
 

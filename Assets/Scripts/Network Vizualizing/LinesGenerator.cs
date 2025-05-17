@@ -44,8 +44,8 @@ public class LinesGenerator : MonoBehaviour
         for (int layer = 0; layer < network.W.Count; layer++)
         {
             var weightMatrix = network.W[layer];
-            int prevCount = weightMatrix.GetLength(0);
-            int currCount = weightMatrix.GetLength(1);
+            int prevCount = weightMatrix.Rows;
+            int currCount = weightMatrix.Columns;
 
             int totalConnections = Mathf.Min(maxConnectionsPerLayer, prevCount * currCount);
 

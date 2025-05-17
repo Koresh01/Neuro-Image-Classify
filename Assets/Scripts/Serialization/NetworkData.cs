@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using UnityEngine;
 
 /// <summary>
 /// Представляет сериализуемую структуру для хранения нейросети в файле.
@@ -8,6 +9,9 @@ using System;
 [Serializable]
 public class NetworkData
 {
+    public List<string> categoryNames;
+    public Vector2Int imageSize;
+
     public List<SerializableMatrix> t;
     public List<SerializableMatrix> h;
     public List<SerializableMatrix> W;
