@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using UnityEngine;
 
 /// <summary>
@@ -16,6 +17,9 @@ public class Matrix
     [Tooltip("Кол-во столбцов")]
     [SerializeField] private int columns;
 
+    public int Rows => rows;
+    public int Columns => columns;
+
     // Конструктор для создания матрицы
     public Matrix(float[,] initialData)
     {
@@ -23,6 +27,13 @@ public class Matrix
         rows = initialData.GetLength(0);
         columns = initialData.GetLength(1);
     }
+    public Matrix(int rows, int columns)
+    {
+        this.rows = rows;
+        this.columns = columns;
+        data = new float[rows, columns];
+    }
+
     #region OPERATORS
     public static Matrix operator -(Matrix a)
     {

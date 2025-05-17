@@ -16,15 +16,9 @@ public class NetworkPersistence : MonoBehaviour
         string filePath = GetSaveFilePath();
         if (string.IsNullOrEmpty(filePath)) return;
 
-        NetworkData data = new NetworkData
-        {
-            t = network.t,
-            h = network.h,
-            W = network.W,
-            B = network.B
-        };
-
+        NetworkData data = new NetworkData(network);
         string json = JsonUtility.ToJson(data, true);
+
         File.WriteAllText(filePath, json);
         Debug.Log($"Сеть сохранена в файл: {filePath}");
     }
@@ -43,13 +37,8 @@ public class NetworkPersistence : MonoBehaviour
 
         string json = File.ReadAllText(filePath);
         NetworkData data = JsonUtility.FromJson<NetworkData>(json);
+        data.ApplyTo(network);
 
-        network.t = data.t;
-        network.h = data.h;
-        network.W = data.W;
-        network.B = data.B;
-
-        network.isReady = true;
         Debug.Log($"Сеть загружена из файла: {filePath}");
     }
 
