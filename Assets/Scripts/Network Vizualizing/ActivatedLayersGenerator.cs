@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-[AddComponentMenu("Custom/LayersGenerator (Рисует слои нейросети)")]
-public class LayersGenerator : MonoBehaviour
+/// <summary>
+/// Отрисовывает активированные нейроны.
+/// </summary>
+public class ActivatedLayersGenerator : MonoBehaviour
 {
     [Inject] Network network;
     [Inject] GradientColorPicker colorPicker;
@@ -92,7 +94,7 @@ public class LayersGenerator : MonoBehaviour
                 0,
                 layerIndex * Mathf.Max(imgSize.x, imgSize.y));
 
-            pos -= new Vector3(count / 2f, 0, 0) * pixelSpacing;
+            pos -= new Vector3(count / 2f, +1, 0) * pixelSpacing;
 
             AddPixel(pos, (float)matrix[0, x]);
         }

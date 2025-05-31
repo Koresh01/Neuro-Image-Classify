@@ -6,15 +6,14 @@ using System.Diagnostics;
 [AddComponentMenu("Custom/Network Vizualizer (Отрисовка состояния сети)")]
 public class NetworkVizualizer : MonoBehaviour
 {
-    [Tooltip("Визуализатор слоёв.")]
-    [Inject] LayersGenerator layersGenerator;
+    [Tooltip("Визуализатор активированных нейронов.")]
+    [Inject] ActivatedLayersGenerator activatedLayersGenerator;
+
+    [Tooltip("Визуализатор НЕ активированных нейронов.")]
+    [Inject] NonActivatedLayersGenerator nonActivatedLayersGenerator;
+
     [Tooltip("Визуализатор линий весов.")]
     [Inject] LinesGenerator linesGenerator;
-    // -------------------------------------------------------
-
-
-    [Tooltip("Нейронная сеть со всеми слоями/весами...")]
-    [Inject] Network network;
 
     [ContextMenu("Переотрисовать нейронку.")]
     public void Vizualize()
@@ -24,7 +23,13 @@ public class NetworkVizualizer : MonoBehaviour
 
     void RedrawNetwork()
     {
-        layersGenerator.DrawLayers();
+        // Рисуем слой активированных нейронов
+        activatedLayersGenerator.DrawLayers();
+
+        // Рисуем слой НЕ активированных нейронов
+        nonActivatedLayersGenerator.DrawLayers();
+
+        // Рисуем линии
         linesGenerator.DrawLines();
     }
 

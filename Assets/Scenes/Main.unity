@@ -1825,6 +1825,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 291929856}
   m_CullTransparentMesh: 1
+--- !u!1 &310759629
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 310759630}
+  - component: {fileID: 310759631}
+  m_Layer: 0
+  m_Name: Non Activated Layers Generator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &310759630
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 310759629}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2018417801}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &310759631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 310759629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85037a68147eabd40a63d4df85261530, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  offset: -5
+  pixelMaterial: {fileID: 2100000, guid: 4a5df3d93df259c4291edf70843ae9d6, type: 2}
+  pixelSize: 1
+  pixelSpacing: 1.2
 --- !u!1 &342726883
 GameObject:
   m_ObjectHideFlags: 0
@@ -2549,7 +2597,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   datasetValidator: {fileID: 248596632}
   gradientColorPicker: {fileID: 1625812878}
-  layersGenerator: {fileID: 890076928}
+  activatedLayersGenerator: {fileID: 890076928}
+  nonActivatedLayersGenerator: {fileID: 310759631}
   connectionsGenerator: {fileID: 1572605489}
 --- !u!1 &430763433
 GameObject:
@@ -5747,7 +5796,7 @@ GameObject:
   - component: {fileID: 890076927}
   - component: {fileID: 890076928}
   m_Layer: 0
-  m_Name: Layers Generator
+  m_Name: Activated Layers Generator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9892,6 +9941,37 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
+  maxAbsColorValue: 10
+  nonActivatedGradient:
+    serializedVersion: 2
+    key0: {r: 0, g: 0, b: 1, a: 1}
+    key1: {r: 0, g: 0.69423604, b: 1, a: 1}
+    key2: {r: 1, g: 0.5666981, b: 0, a: 0}
+    key3: {r: 0.97647065, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 19661
+    ctime2: 45875
+    ctime3: 65535
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 4
+    m_NumAlphaKeys: 2
   maxAllowedDelta: 0.00000001
   deltaGradient:
     serializedVersion: 2
@@ -11562,6 +11642,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 890076927}
+  - {fileID: 310759630}
   - {fileID: 1572605488}
   m_Father: {fileID: 1574905469}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

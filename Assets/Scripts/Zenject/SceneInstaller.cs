@@ -4,16 +4,19 @@ using Zenject;
 [AddComponentMenu("Custom/SceneInstaller (Бинды сцены)")]
 public class SceneInstaller : MonoInstaller
 {
-    [Tooltip("Валидатор датасета.")]
+    [Header("Валидатор датасета.")]
     [SerializeField] private DatasetValidator datasetValidator;
 
-    [Tooltip("Контроллер получения цветов.")]
+    [Header("Контроллер получения цветов.")]
     [SerializeField] private GradientColorPicker gradientColorPicker;
 
-    [Tooltip("Визуализатор слоёв.")]
-    [SerializeField] private LayersGenerator layersGenerator;
+    [Header("Визуализатор активированных слоёв нейросети.")]
+    [SerializeField] private ActivatedLayersGenerator activatedLayersGenerator;
 
-    [Tooltip("Визуализатор линий весов.")]
+    [Header("Визуализатор НЕ активированных слоёв нейросети.")]
+    [SerializeField] private NonActivatedLayersGenerator nonActivatedLayersGenerator;
+
+    [Header("Визуализатор линий весов.")]
     [SerializeField] private LinesGenerator connectionsGenerator;
     public override void InstallBindings()
     {
@@ -21,7 +24,9 @@ public class SceneInstaller : MonoInstaller
 
         Container.Bind<GradientColorPicker>().FromInstance(gradientColorPicker).AsSingle();
 
-        Container.Bind<LayersGenerator>().FromInstance(layersGenerator).AsSingle();
+        Container.Bind<ActivatedLayersGenerator>().FromInstance(activatedLayersGenerator).AsSingle();
+        Container.Bind<NonActivatedLayersGenerator>().FromInstance(nonActivatedLayersGenerator).AsSingle();
+
         Container.Bind<LinesGenerator>().FromInstance(connectionsGenerator).AsSingle();
 
         // Singleton:
