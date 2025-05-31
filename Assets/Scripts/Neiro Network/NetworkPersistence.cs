@@ -11,6 +11,7 @@ public class NetworkPersistence : MonoBehaviour
 {
     [Inject] private Network network;
     [Inject] private DatasetValidator datasetValidator; // чтобы заполнить [Tooltip("Названия категорий (общие для train и test).")] public List<string> categoryNames;
+    [Inject] private NetworkVizualizer networkVizualizer;
 
     [AddComponentMenu("Экспорт в .json")]
     public void Save()
@@ -48,6 +49,7 @@ public class NetworkPersistence : MonoBehaviour
         datasetValidator.categoryNames = new List<string>(data.categoryNames);
         datasetValidator.imageSize = data.imageSize;
 
+        networkVizualizer.Vizualize();
         Debug.Log($"Сеть загружена из файла: {filePath}");
     }
 

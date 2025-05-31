@@ -37,14 +37,8 @@ class NetworkConfigSaver : MonoBehaviour
     private void SaveConfig()
     {
         List<Matrix> t_midterm = new List<Matrix>();
-        if (datasetValidator.isValid)
-        {
-            t_midterm = GenerateMidternLayers();
-        } 
-        else
-        {
-            Debug.LogWarning("Сначала инициализируйте входной и выходной слои, посредством ВАЛИДАЦИИ датасета.");
-        }
+        t_midterm = GenerateMidternLayers();
+        
 
         // Передаём конфигурацию в сеть
         network.Init(t_midterm);
