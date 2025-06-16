@@ -1869,6 +1869,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85037a68147eabd40a63d4df85261530, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  network: {fileID: 0}
+  colorPicker: {fileID: 0}
+  datasetValidator: {fileID: 0}
   offset: -5
   pixelMaterial: {fileID: 2100000, guid: 4a5df3d93df259c4291edf70843ae9d6, type: 2}
   pixelSize: 1
@@ -2598,7 +2601,6 @@ MonoBehaviour:
   datasetValidator: {fileID: 248596632}
   gradientColorPicker: {fileID: 1625812878}
   activatedLayersGenerator: {fileID: 890076928}
-  nonActivatedLayersGenerator: {fileID: 310759631}
   connectionsGenerator: {fileID: 1572605489}
 --- !u!1 &430763433
 GameObject:
@@ -11807,7 +11809,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0.001
+  m_Text: 0,001
 --- !u!222 &2022677349
 CanvasRenderer:
   m_ObjectHideFlags: 0

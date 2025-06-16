@@ -55,6 +55,7 @@ public class ActivatedLayersGenerator : MonoBehaviour
                     y * pixelSpacing,
                     0);
 
+                // Центрирование:
                 pos -= new Vector3(imgSize.x / 2f, imgSize.y / 2f, 0) * pixelSpacing;
 
                 AddPixel(pos, (float)matrix[0, y * imgSize.x + x]);
