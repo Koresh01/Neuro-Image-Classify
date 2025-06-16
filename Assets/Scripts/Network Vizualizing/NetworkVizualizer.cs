@@ -12,6 +12,9 @@ public class NetworkVizualizer : MonoBehaviour
     [Tooltip("Визуализатор линий весов.")]
     [Inject] LinesGenerator linesGenerator;
 
+    [Tooltip("Визуализатор названий категорий.")]
+    [Inject] CategoryLabelsDrawer categoryLabelsDrawer;
+
     [ContextMenu("Переотрисовать нейронку.")]
     public void Vizualize()
     {
@@ -23,11 +26,11 @@ public class NetworkVizualizer : MonoBehaviour
         // Рисуем слой активированных нейронов
         activatedLayersGenerator.DrawLayers();
 
-        // Рисуем слой НЕ активированных нейронов
-        // nonActivatedLayersGenerator.DrawLayers();
-
         // Рисуем линии
         linesGenerator.DrawLines();
+
+        // Отрисуем названия категорий
+        categoryLabelsDrawer.GenerateLabels();
     }
 
     

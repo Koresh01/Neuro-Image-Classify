@@ -13,6 +13,9 @@ public class SceneInstaller : MonoInstaller
     [Header("Визуализатор активированных слоёв нейросети.")]
     [SerializeField] private ActivatedLayersGenerator activatedLayersGenerator;
 
+    [Header("Визуализатор названий категорий (около выходного слоя нейросети):")]
+    [SerializeField] private CategoryLabelsDrawer categoryLabelsDrawer;
+
 
     [Header("Визуализатор линий весов.")]
     [SerializeField] private LinesGenerator connectionsGenerator;
@@ -23,6 +26,7 @@ public class SceneInstaller : MonoInstaller
         Container.Bind<GradientColorPicker>().FromInstance(gradientColorPicker).AsSingle();
 
         Container.Bind<ActivatedLayersGenerator>().FromInstance(activatedLayersGenerator).AsSingle();
+        Container.Bind<CategoryLabelsDrawer>().FromInstance(categoryLabelsDrawer).AsSingle();
 
         Container.Bind<LinesGenerator>().FromInstance(connectionsGenerator).AsSingle();
 
