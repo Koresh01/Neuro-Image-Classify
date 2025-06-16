@@ -10,7 +10,6 @@ public class LinesGenerator : MonoBehaviour
     [Inject] Network network;
     [Inject] GradientColorPicker colorPicker;
     [Inject] ActivatedLayersGenerator activatedLayersGenerator;
-    [Inject] NonActivatedLayersGenerator nonActivatedLayersGenerator;
 
     [Header("Материал для линий")]
     [SerializeField] Material lineMaterial;
@@ -58,7 +57,7 @@ public class LinesGenerator : MonoBehaviour
                 int j = rand.Next(currCount);
 
                 Vector3 from = activatedLayersGenerator.pixelPositions[indexOffset + i];
-                Vector3 to = activatedLayersGenerator.pixelPositions[indexOffset + prevCount + j] + new Vector3(0, 0, nonActivatedLayersGenerator.offset);
+                Vector3 to = activatedLayersGenerator.pixelPositions[indexOffset + prevCount + j];
 
                 // реакция цвета линии по изменению веса линии
                 float weight = (float)weightMatrix[i, j];

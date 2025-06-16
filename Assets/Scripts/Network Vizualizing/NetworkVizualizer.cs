@@ -9,9 +9,6 @@ public class NetworkVizualizer : MonoBehaviour
     [Tooltip("Визуализатор активированных нейронов.")]
     [Inject] ActivatedLayersGenerator activatedLayersGenerator;
 
-    [Tooltip("Визуализатор НЕ активированных нейронов.")]
-    [Inject] NonActivatedLayersGenerator nonActivatedLayersGenerator;
-
     [Tooltip("Визуализатор линий весов.")]
     [Inject] LinesGenerator linesGenerator;
 
@@ -27,7 +24,7 @@ public class NetworkVizualizer : MonoBehaviour
         activatedLayersGenerator.DrawLayers();
 
         // Рисуем слой НЕ активированных нейронов
-        nonActivatedLayersGenerator.DrawLayers();
+        // nonActivatedLayersGenerator.DrawLayers();
 
         // Рисуем линии
         linesGenerator.DrawLines();
