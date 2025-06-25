@@ -21,6 +21,9 @@ public class ActivatedLayersGenerator : MonoBehaviour
     [Header("Расстояние между пикселями:")]
     [Range(1f, 2f)] public float pixelSpacing = 1.2f;
 
+    [Header("Расстояние между слоями нейросети:")]
+    public float pixelSpacing_Z = 50;
+
     [NonSerialized] public List<Vector3> pixelPositions = new();
     [NonSerialized] public List<Color> pixelColors = new();
 
@@ -76,7 +79,7 @@ public class ActivatedLayersGenerator : MonoBehaviour
             Vector3 pos = new(
                 x * pixelSpacing,
                 y * pixelSpacing,
-                layerIndex * Mathf.Max(imgSize.x, imgSize.y));
+                layerIndex * pixelSpacing_Z);
 
             pos -= new Vector3(side / 2f, side / 2f, 0) * pixelSpacing;
 
@@ -93,7 +96,7 @@ public class ActivatedLayersGenerator : MonoBehaviour
             Vector3 pos = new(
                 x * pixelSpacing,
                 0,
-                layerIndex * Mathf.Max(imgSize.x, imgSize.y));
+                layerIndex * pixelSpacing_Z);
 
             pos -= new Vector3(count / 2f, +1, 0) * pixelSpacing;
 
