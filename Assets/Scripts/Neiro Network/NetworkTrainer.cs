@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 /// <summary>
@@ -19,9 +20,14 @@ class NetworkTrainer : MonoBehaviour
 
     private CancellationTokenSource cancellationTokenSource;
 
+    [Header("Graph placeholder:")]
+    public Image graphImage;
+    private GraphPlot plot;
+
     private void Awake()
     {
         cancellationTokenSource = new CancellationTokenSource();
+        plot = new GraphPlot(graphImage, 1024, 1024);
     }
 
     [ContextMenu("Полное обучение.")]
@@ -62,6 +68,7 @@ class NetworkTrainer : MonoBehaviour
                 networkVizualizer.Vizualize();
 
                 Debug.Log($"[{count++}/{datasetValidator.trainImagesPaths.Count}] Ошибка: {res.Error} | Истинная категория: {res.TrueLabelIndex} | Предсказано: {categoryManager.GetName(res.PredictedCategoryIndex)}");
+                plot.AddPoint(count, res.Error);
             }
         }
         catch (OperationCanceledException)
